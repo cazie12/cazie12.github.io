@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevLink — Roblox Developer Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0e1420;
+    --surface2: #151d2e;
+    --border: #1e2d47;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --text: #e8f0fe;
+    --muted: #6b7fa3;
+    --success: #10b981;
+    --danger: #ef4444;
+    --node-color: rgba(0,212,255,0.15);
+    --line-color: rgba(0,212,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== CANVAS BACKGROUND ===== */
+  #connections-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ===== LAYOUT ===== */
+  .page { display: none; position: relative; z-index: 1; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ===== NAVBAR ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(8,12,20,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-logo span { color: var(--text); }
+
+  .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+
+  .nav-btn {
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active { color: var(--accent); }
+
+  .nav-btn.primary {
+    background: var(--accent);
+    color: #000;
+    padding: 0.5rem 1.25rem;
+  }
+  .nav-btn.primary:hover { background: #00bfef; color: #000; }
+
+  /* ===== HOME PAGE ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--accent);
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge::before { content: '●'; font-size: 0.5rem; animation: pulse 2s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .hero h1 {
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero h1 .grad {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.6s 0.2s ease both;
+    font-weight: 400;
+  }
+
+  .hero-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-discord {
+    display: inline-flex; align-items: center; gap: 0.75rem;
+    background: #5865F2;
+    color: #fff;
+    padding: 0.9rem 2rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none; cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Syne', sans-serif;
+  }
+  .btn-discord:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(88,101,242,0.4); }
+
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: transparent;
+    color: var(--text);
+    padding: 0.9rem 2rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Syne', sans-serif;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  .stats-row {
+    display: flex; gap: 4rem; margin-top: 5rem;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+
+  /* Features Section */
+  .section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub { color: var(--muted); font-size: 1rem; max-width: 500px; line-height: 1.7; margin-bottom: 3rem; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon {
+    font-size: 2rem; margin-bottom: 1rem;
+    width: 56px; height: 56px;
+    background: rgba(0,212,255,0.08);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(0,212,255,0.15);
+  }
+
+  .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .feature-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+  /* Discord CTA */
+  .discord-cta {
+    background: linear-gradient(135deg, rgba(88,101,242,0.15), rgba(124,58,237,0.1));
+    border: 1px solid rgba(88,101,242,0.3);
+    border-radius: 24px;
+    padding: 4rem 3rem;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 6rem;
+  }
+
+  .discord-cta h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1rem; }
+  .discord-cta p { color: var(--muted); margin-bottom: 2rem; line-height: 1.7; }
+
+  /* ===== PORTFOLIO PAGE ===== */
+  .portfolio-hero {
+    padding: 8rem 2rem 3rem;
+    max-width: 900px; margin: 0 auto;
+    text-align: center;
+  }
+
+  .portfolio-hero h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 1rem; }
+  .portfolio-hero p { color: var(--muted); font-size: 1rem; line-height: 1.7; max-width: 500px; margin: 0 auto 3rem; }
+
+  .form-container {
+    max-width: 700px; margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+  }
+
+  .form-section-title {
+    font-size: 0.75rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 2rem 0 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .form-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .form-group { margin-bottom: 1.25rem; }
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .form-group label span { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+  }
+  .form-textarea { resize: vertical; min-height: 120px; }
+
+  .subdomain-row {
+    display: flex; align-items: center; gap: 0;
+  }
+  .subdomain-prefix {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    padding: 0.75rem 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    font-family: 'Space Mono', monospace;
+  }
+  .subdomain-input {
+    border-radius: 0 10px 10px 0 !important;
+    font-family: 'Space Mono', monospace !important;
+  }
+
+  .skills-grid {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .skill-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    user-select: none;
+  }
+  .skill-tag.selected {
+    background: rgba(0,212,255,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .role-select-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+  }
+  .role-option {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .role-option:hover { border-color: var(--accent); }
+  .role-option.selected {
+    background: rgba(0,212,255,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .role-option .role-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+  .role-option .role-name { font-size: 0.85rem; font-weight: 700; }
+  .role-option .role-desc { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(0,212,255,0.25); }
+
+  .portfolio-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .portfolio-preview span { color: var(--accent); }
+
+  /* ===== ADMIN PAGE ===== */
+  .admin-layout {
+    display: flex;
+    min-height: 100vh;
+    padding-top: 65px;
+  }
+
+  .admin-sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section { margin-bottom: 2rem; }
+  .sidebar-label {
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.875rem;
+    color: var(--muted);
+    border: none; background: none; width: 100%; text-align: left;
+    font-family: 'Syne', sans-serif; font-weight: 600;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: rgba(0,212,255,0.1); color: var(--accent); }
+
+  .admin-content { flex: 1; padding: 2.5rem; overflow-y: auto; }
+
+  .admin-header { margin-bottom: 2.5rem; }
+  .admin-header h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; }
+  .admin-header p { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem; }
+
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; }
+
+  /* Stats cards */
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+  .stat-card .sc-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .stat-card .sc-value { font-size: 2rem; font-weight: 800; font-family: 'Space Mono', monospace; }
+  .stat-card .sc-change { font-size: 0.75rem; color: var(--success); margin-top: 0.25rem; }
+
+  /* Tables */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.75rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+  }
+  .badge-green { background: rgba(16,185,129,0.15); color: var(--success); }
+  .badge-yellow { background: rgba(245,158,11,0.15); color: var(--accent3); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .badge-blue { background: rgba(0,212,255,0.15); color: var(--accent); }
+
+  .action-btn {
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* Settings panel */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .settings-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+  }
+  .settings-card.full { grid-column: 1 / -1; }
+
+  .settings-card h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .settings-card .sc-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .setting-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .setting-item:first-child { padding-top: 0; }
+
+  .setting-info { flex: 1; }
+  .setting-label { font-size: 0.875rem; font-weight: 600; }
+  .setting-desc { font-size: 0.775rem; color: var(--muted); margin-top: 0.15rem; }
+
+  /* Toggle */
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--border);
+    border-radius: 999px;
+    transition: 0.3s;
+  }
+  .toggle-slider:before {
+    position: absolute;
+    content: '';
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+  .color-input-row {
+    display: flex; gap: 0.5rem; align-items: center;
+  }
+  .color-input-row input[type="color"] {
+    width: 40px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    padding: 2px;
+  }
+  .color-input-row .form-input { flex: 1; }
+
+  .save-settings-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s;
+  }
+  .save-settings-btn:hover { background: #00bfef; transform: translateY(-1px); }
+
+  /* Login overlay */
+  #admin-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 65px);
+    padding: 2rem;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+  }
+  .login-card h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; }
+  .login-card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+  .login-error { color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem; display: none; }
+
+  /* Portfolio showcase */
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .portfolio-mini {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s;
+  }
+  .portfolio-mini:hover { border-color: rgba(0,212,255,0.3); }
+  .portfolio-mini .pm-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .portfolio-mini .pm-role { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.75rem; font-family: 'Space Mono', monospace; }
+  .portfolio-mini .pm-skills { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .pm-skill { background: var(--surface2); border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.7rem; color: var(--muted); }
+  .portfolio-mini .pm-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
+
+  /* Range input */
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 999px;
+    outline: none;
+    margin: 0.5rem 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); }
+
+  /* Notification */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+    background: var(--surface);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 0.875rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  #toast.show { transform: none; opacity: 1; }
+
+  /* Section divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  @media (max-width: 768px) {
+    .settings-grid { grid-template-columns: 1fr; }
+    .admin-sidebar { display: none; }
+    .stats-row { gap: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="connections-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">dev<span>link</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('home')">Home</button>
+    <button class="nav-btn" onclick="showPage('portfolio')">Portfolio</button>
+    <button class="nav-btn" onclick="showPage('admin')">Admin</button>
+    <button class="btn-discord nav-btn primary" onclick="openDiscord()" style="font-size:0.8rem;padding:0.5rem 1rem;">Join Discord</button>
+  </div>
+</nav>
+
+<!-- =========== HOME PAGE =========== -->
+<div id="page-home" class="page active">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">🎮 Roblox Developer Network</div>
+    <h1>Connect.<br><span class="grad">Get Hired.</span><br>Build.</h1>
+    <p>The #1 community for Roblox developers. Whether you're hiring talent or looking for your next gig — DevLink connects you.</p>
+    <div class="hero-actions">
+      <button class="btn-discord" onclick="openDiscord()">
+        <svg width="22" height="16" viewBox="0 0 71 55" fill="white"><path d="M60.1 4.9A58.6 58.6 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A37.7 37.7 0 0 0 25.4.5a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.6 4.9a.2.2 0 0 0-.1.1C1.6 18 -.9 30.8.3 43.4a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.3 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36.3 36.3 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-9 .2.2 0 0 0 .1-.2C72.1 28.8 68.3 16.1 60.2 5a.2.2 0 0 0-.1-.1zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.9 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
+        Join Our Discord
+      </button>
+      <button class="btn-outline" onclick="showPage('portfolio')">✦ Create Portfolio</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num" id="memberCount">1,247</div><div class="stat-label">Members</div></div>
+      <div class="stat"><div class="stat-num" id="jobCount">342</div><div class="stat-label">Jobs Posted</div></div>
+      <div class="stat"><div class="stat-num" id="hiredCount">89</div><div class="stat-label">Hired This Month</div></div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="section">
+    <div class="section-label">Why DevLink</div>
+    <h2 class="section-title">Built for Roblox devs,<br>by Roblox devs.</h2>
+    <p class="section-sub">Everything you need to find your next opportunity or build your dream team — all in one place.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧑‍💻</div>
+        <h3>Dev Portfolios</h3>
+        <p>Create a stunning portfolio with your own subdomain. Show off your projects, skills, and past work to potential hirers.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💼</div>
+        <h3>Job Board</h3>
+        <p>Browse curated job listings from verified Roblox studios and developers. Filter by role, pay, and availability.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>Discord Integration</h3>
+        <p>All listings sync with our Discord. Get pinged instantly when a role matching your skills is posted.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3>Verified Studios</h3>
+        <p>All hiring studios are manually verified. No scams, no time-wasters — only legitimate opportunities.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Pay Transparency</h3>
+        <p>Every listing shows expected compensation upfront. Know your worth before you apply.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Instant Matching</h3>
+        <p>Our matching algorithm connects hirers with the right devs based on skills, availability, and project type.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discord CTA -->
+  <div class="section">
+    <div class="discord-cta">
+      <h2>Ready to level up?</h2>
+      <p>Join over 1,200 Roblox developers in the DevLink Discord. Post jobs, find work, and connect with the community.</p>
+      <button class="btn-discord" onclick="openDiscord()" style="font-size:1rem;padding:1rem 2.5rem;">
+        <svg width="22" height="16" viewBox="0 0 71 55" fill="white"><path d="M60.1 4.9A58.6 58.6 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A37.7 37.7 0 0 0 25.4.5a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.6 4.9a.2.2 0 0 0-.1.1C1.6 18 -.9 30.8.3 43.4a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.3 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36.3 36.3 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-9 .2.2 0 0 0 .1-.2C72.1 28.8 68.3 16.1 60.2 5a.2.2 0 0 0-.1-.1zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.9 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
+        Join DevLink Discord
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- =========== PORTFOLIO PAGE =========== -->
+<div id="page-portfolio" class="page">
+  <div class="portfolio-hero">
+    <div class="hero-badge" style="animation:none;">✦ Free Portfolio Builder</div>
+    <h1>Your Portfolio,<br><span class="grad">Your Brand.</span></h1>
+    <p>Create your dev profile and get your own subdomain. Share it with studios and showcase your work.</p>
+  </div>
+
+  <div class="form-container">
+    <div class="form-card">
+      <!-- Basic Info -->
+      <div class="form-section-title">Basic Info</div>
+
+      <div class="form-group">
+        <label>Display Name</label>
+        <input class="form-input" type="text" placeholder="e.g. CoolDev123" id="pf-name">
+      </div>
+
+      <div class="form-group">
+        <label>Subdomain <span>— your public URL</span></label>
+        <div class="subdomain-row">
+          <div class="subdomain-prefix">devlink.gg/</div>
+          <input class="form-input subdomain-input" type="text" placeholder="cooldev123" id="pf-subdomain" oninput="updatePreview()">
+        </div>
+        <div class="portfolio-preview">Your portfolio: devlink.gg/<span id="preview-sub">cooldev123</span></div>
+      </div>
+
+      <div class="form-group">
+        <label>Bio <span>— tell people about yourself</span></label>
+        <textarea class="form-textarea" placeholder="Experienced Roblox scripter with 4 years building simulators and RPGs..." id="pf-bio"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Discord Username</label>
+        <input class="form-input" type="text" placeholder="cooldev#1234 or @cooldev" id="pf-discord">
+      </div>
+
+      <!-- Role -->
+      <div class="form-section-title">I am looking to…</div>
+      <div class="role-select-grid">
+        <div class="role-option selected" onclick="selectRole(this, 'dev')">
+          <div class="role-icon">🧑‍💻</div>
+          <div class="role-name">Get Hired</div>
+          <div class="role-desc">I'm a developer</div>
+        </div>
+        <div class="role-option" onclick="selectRole(this, 'hirer')">
+          <div class="role-icon">🏢</div>
+          <div class="role-name">Hire Developers</div>
+          <div class="role-desc">I'm a studio / hirer</div>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="form-section-title">Skills</div>
+      <div class="skills-grid" id="skills-grid">
+        <div class="skill-tag selected" onclick="toggleSkill(this)">Scripting (Lua)</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Building</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">UI Design</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Animation</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">VFX</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">GFX / Art</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Game Design</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Audio</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Modeling (Blender)</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Texturing</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Project Management</div>
+        <div class="skill-tag" onclick="toggleSkill(this)">Marketing</div>
+      </div>
+
+      <!-- Experience -->
+      <div class="form-section-title">Experience & Links</div>
+
+      <div class="form-group">
+        <label>Years of Experience</label>
+        <input type="range" min="0" max="10" value="2" id="pf-exp" oninput="document.getElementById('exp-val').textContent = this.value">
+        <div class="range-labels"><span>0 years</span><span id="exp-val">2 years</span><span>10+ years</span></div>
+      </div>
+
+      <div class="form-group">
+        <label>Portfolio / Projects Link <span>— optional</span></label>
+        <input class="form-input" type="url" placeholder="https://youtube.com/your-showcase" id="pf-link">
+      </div>
+
+      <div class="form-group">
+        <label>Hourly Rate / Pay Expectation <span>— optional</span></label>
+        <input class="form-input" type="text" placeholder="e.g. 5-15 USD/hr or 1000 Robux/hr" id="pf-rate">
+      </div>
+
+      <div class="form-group">
+        <label>Availability</label>
+        <select class="form-select" id="pf-avail">
+          <option>Available Now</option>
+          <option>Available Part-Time</option>
+          <option>Busy — Open to Offers</option>
+          <option>Not Available</option>
+        </select>
+      </div>
+
+      <button class="btn-submit" onclick="submitPortfolio()">✦ Create My Portfolio</button>
+    </div>
+
+    <!-- Existing Portfolios Preview -->
+    <div style="margin-top: 3rem;">
+      <div class="section-label">Recent Portfolios</div>
+      <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:1.5rem;">Browse Developers</h3>
+      <div class="portfolio-grid" id="portfolio-list">
+        <div class="portfolio-mini">
+          <div class="pm-name">ZephyrScript</div>
+          <div class="pm-role">Scripter • Available Now</div>
+          <div class="pm-skills">
+            <span class="pm-skill">Scripting</span><span class="pm-skill">UI Design</span><span class="pm-skill">VFX</span>
+          </div>
+          <div class="pm-actions">
+            <button class="action-btn">View</button>
+            <button class="action-btn">Discord</button>
+          </div>
+        </div>
+        <div class="portfolio-mini">
+          <div class="pm-name">NovaBuilds</div>
+          <div class="pm-role">Builder • Part-Time</div>
+          <div class="pm-skills">
+            <span class="pm-skill">Building</span><span class="pm-skill">Modeling</span><span class="pm-skill">Texturing</span>
+          </div>
+          <div class="pm-actions"><button class="action-btn">View</button><button class="action-btn">Discord</button></div>
+        </div>
+        <div class="portfolio-mini">
+          <div class="pm-name">PixelArtist_Kai</div>
+          <div class="pm-role">GFX Artist • Available Now</div>
+          <div class="pm-skills">
+            <span class="pm-skill">GFX / Art</span><span class="pm-skill">UI Design</span>
+          </div>
+          <div class="pm-actions"><button class="action-btn">View</button><button class="action-btn">Discord</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== ADMIN PAGE =========== -->
+<div id="page-admin" class="page">
+  <!-- Login Screen -->
+  <div id="admin-login">
+    <div class="login-card">
+      <h2>⚙️ Admin Panel</h2>
+      <p>Enter your admin password to access the panel.</p>
+      <div class="form-group">
+        <label>Password</label>
+        <input class="form-input" type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
+        <div class="login-error" id="login-error">Incorrect password. Try: admin123</div>
+      </div>
+      <button class="btn-submit" onclick="adminLogin()">Access Panel →</button>
+      <div style="margin-top:1rem;font-size:0.75rem;color:var(--muted);">Demo password: <code style="color:var(--accent)">admin123</code></div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard (hidden until login) -->
+  <div id="admin-dashboard" style="display:none;">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <div class="admin-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Overview</div>
+          <button class="sidebar-item active" onclick="adminTab('dashboard', this)">📊 Dashboard</button>
+          <button class="sidebar-item" onclick="adminTab('portfolios', this)">👥 Portfolios</button>
+          <button class="sidebar-item" onclick="adminTab('members', this)">🧑‍💻 Members</button>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Config</div>
+          <button class="sidebar-item" onclick="adminTab('settings', this)">⚙️ Settings</button>
+          <button class="sidebar-item" onclick="adminTab('discord', this)">💬 Discord</button>
+          <button class="sidebar-item" onclick="adminTab('appearance', this)">🎨 Appearance</button>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Account</div>
+          <button class="sidebar-item" onclick="adminLogout()" style="color:var(--danger)">🚪 Logout</button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+
+        <!-- Dashboard Panel -->
+        <div class="admin-panel active" id="panel-dashboard">
+          <div class="admin-header">
+            <h1>Dashboard</h1>
+            <p>Welcome back! Here's what's happening on DevLink.</p>
+          </div>
+
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="sc-label">Total Members</div>
+              <div class="sc-value" style="color:var(--accent)">1,247</div>
+              <div class="sc-change">↑ +42 this week</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-label">Active Portfolios</div>
+              <div class="sc-value" style="color:var(--accent2)">384</div>
+              <div class="sc-change">↑ +12 this week</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-label">Jobs Posted</div>
+              <div class="sc-value" style="color:var(--accent3)">89</div>
+              <div class="sc-change">↑ +7 today</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-label">Pending Review</div>
+              <div class="sc-value" style="color:var(--danger)">5</div>
+              <div class="sc-change" style="color:var(--accent3)">⚠ Action needed</div>
+            </div>
+          </div>
+
+          <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--muted);font-weight:600;">RECENT ACTIVITY</h3>
+          <table class="data-table">
+            <thead><tr><th>User</th><th>Action</th><th>Time</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>ZephyrScript</td><td>Created portfolio</td><td>2 min ago</td><td><span class="badge badge-green">Live</span></td></tr>
+              <tr><td>StarStudio</td><td>Posted job listing</td><td>15 min ago</td><td><span class="badge badge-yellow">Review</span></td></tr>
+              <tr><td>NovaBuilds</td><td>Updated portfolio</td><td>1 hr ago</td><td><span class="badge badge-green">Live</span></td></tr>
+              <tr><td>CoolGame Inc.</td><td>Posted job listing</td><td>3 hrs ago</td><td><span class="badge badge-yellow">Review</span></td></tr>
+              <tr><td>PixelArtist_Kai</td><td>Joined server</td><td>5 hrs ago</td><td><span class="badge badge-blue">New</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Portfolios Panel -->
+        <div class="admin-panel" id="panel-portfolios">
+          <div class="admin-header">
+            <h1>Portfolios</h1>
+            <p>Manage all developer portfolios.</p>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Developer</th><th>Subdomain</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>ZephyrScript</td>
+                <td><code style="color:var(--accent);font-size:0.8rem">devlink.gg/zephyrscript</code></td>
+                <td>Scripter</td>
+                <td><span class="badge badge-green">Live</span></td>
+                <td><button class="action-btn">Edit</button> <button class="action-btn danger">Remove</button></td>
+              </tr>
+              <tr>
+                <td>NovaBuilds</td>
+                <td><code style="color:var(--accent);font-size:0.8rem">devlink.gg/novabuilds</code></td>
+                <td>Builder</td>
+                <td><span class="badge badge-green">Live</span></td>
+                <td><button class="action-btn">Edit</button> <button class="action-btn danger">Remove</button></td>
+              </tr>
+              <tr>
+                <td>PixelArtist_Kai</td>
+                <td><code style="color:var(--accent);font-size:0.8rem">devlink.gg/pixelkai</code></td>
+                <td>GFX Artist</td>
+                <td><span class="badge badge-yellow">Pending</span></td>
+                <td><button class="action-btn" style="color:var(--success);border-color:var(--success)">Approve</button> <button class="action-btn danger">Reject</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Members Panel -->
+        <div class="admin-panel" id="panel-members">
+          <div class="admin-header">
+            <h1>Members</h1>
+            <p>View and manage Discord members.</p>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Username</th><th>Discord</th><th>Joined</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>ZephyrScript</td><td>zephyr#1234</td><td>Jan 2025</td><td><span class="badge badge-blue">Dev</span></td><td><button class="action-btn danger">Ban</button></td></tr>
+              <tr><td>StarStudio</td><td>star#9900</td><td>Dec 2024</td><td><span class="badge badge-yellow">Hirer</span></td><td><button class="action-btn danger">Ban</button></td></tr>
+              <tr><td>NovaBuilds</td><td>nova#5678</td><td>Feb 2025</td><td><span class="badge badge-blue">Dev</span></td><td><button class="action-btn danger">Ban</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="admin-panel" id="panel-settings">
+          <div class="admin-header">
+            <h1>Settings</h1>
+            <p>Tweak how DevLink works.</p>
+          </div>
+          <div class="settings-grid">
+            <div class="settings-card">
+              <h3>General</h3>
+              <p class="sc-desc">Core website settings.</p>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Server Name</div>
+                  <div class="setting-desc">Shown in navbar and page title</div>
+                </div>
+                <input class="form-input" style="width:160px" type="text" value="DevLink" id="s-name">
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Discord Invite Link</div>
+                  <div class="setting-desc">The link Join buttons point to</div>
+                </div>
+                <input class="form-input" style="width:200px" type="url" value="https://discord.gg/devlink" id="s-discord">
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Portfolio Subdomain Base</div>
+                  <div class="setting-desc">Base URL for portfolios</div>
+                </div>
+                <input class="form-input" style="width:200px" type="text" value="devlink.gg/" id="s-base">
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3>Moderation</h3>
+              <p class="sc-desc">Control what needs approval.</p>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Approve Portfolios</div>
+                  <div class="setting-desc">Manually review before going live</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Approve Job Listings</div>
+                  <div class="setting-desc">Manually review job posts</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Anti-Spam Filter</div>
+                  <div class="setting-desc">Block repeated submissions</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3>Features</h3>
+              <p class="sc-desc">Turn features on or off.</p>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Portfolio Builder</div>
+                  <div class="setting-desc">Allow devs to create portfolios</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Job Board</div>
+                  <div class="setting-desc">Show job listings section</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-label">Registration Open</div>
+                  <div class="setting-desc">Allow new portfolio signups</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3>Stats Display</h3>
+              <p class="sc-desc">Edit the numbers shown on the home page.</p>
+
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Members Count</div></div>
+                <input class="form-input" style="width:110px" type="text" value="1,247" id="s-members">
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Jobs Posted</div></div>
+                <input class="form-input" style="width:110px" type="text" value="342" id="s-jobs">
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Hired This Month</div></div>
+                <input class="form-input" style="width:110px" type="text" value="89" id="s-hired">
+              </div>
+            </div>
+          </div>
+          <button class="save-settings-btn" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+
+        <!-- Discord Panel -->
+        <div class="admin-panel" id="panel-discord">
+          <div class="admin-header">
+            <h1>Discord Integration</h1>
+            <p>Configure the Discord connection.</p>
+          </div>
+          <div class="settings-grid">
+            <div class="settings-card full">
+              <h3>Discord Settings</h3>
+              <p class="sc-desc">Connect DevLink to your Discord server for auto-posting and sync.</p>
+              <div class="form-group">
+                <label>Discord Invite URL</label>
+                <input class="form-input" type="url" value="https://discord.gg/devlink" id="d-invite">
+              </div>
+              <div class="form-group">
+                <label>Bot Token <span>— optional, for auto-post</span></label>
+                <input class="form-input" type="password" placeholder="••••••••••••••" id="d-token">
+              </div>
+              <div class="form-group">
+                <label>Job Listings Channel ID</label>
+                <input class="form-input" type="text" placeholder="123456789012345678" id="d-channel">
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Auto-post new jobs to Discord</div><div class="setting-desc">Automatically send new job listings to the configured channel</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Ping @here on new listings</div><div class="setting-desc">Notify all online members of new job posts</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+          <button class="save-settings-btn" onclick="saveSettings()">💾 Save Discord Config</button>
+        </div>
+
+        <!-- Appearance Panel -->
+        <div class="admin-panel" id="panel-appearance">
+          <div class="admin-header">
+            <h1>Appearance</h1>
+            <p>Customize how DevLink looks.</p>
+          </div>
+          <div class="settings-grid">
+            <div class="settings-card full">
+              <h3>Colors</h3>
+              <p class="sc-desc">Change the accent colors used throughout the site.</p>
+
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Primary Accent</div><div class="setting-desc">Main highlight color</div></div>
+                <div class="color-input-row">
+                  <input type="color" value="#00d4ff" oninput="updateColor('--accent', this.value); document.getElementById('c-accent').value = this.value">
+                  <input class="form-input" type="text" value="#00d4ff" id="c-accent" style="width:110px;font-family:'Space Mono',monospace" oninput="updateColor('--accent', this.value)">
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Secondary Accent</div><div class="setting-desc">Gradient & highlight color</div></div>
+                <div class="color-input-row">
+                  <input type="color" value="#7c3aed" oninput="updateColor('--accent2', this.value); document.getElementById('c-accent2').value = this.value">
+                  <input class="form-input" type="text" value="#7c3aed" id="c-accent2" style="width:110px;font-family:'Space Mono',monospace" oninput="updateColor('--accent2', this.value)">
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Background Color</div></div>
+                <div class="color-input-row">
+                  <input type="color" value="#080c14" oninput="updateColor('--bg', this.value)">
+                  <input class="form-input" type="text" value="#080c14" style="width:110px;font-family:'Space Mono',monospace">
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card full">
+              <h3>Connections Background</h3>
+              <p class="sc-desc">Tweak the animated network background.</p>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Enable Animation</div></div>
+                <label class="toggle"><input type="checkbox" checked id="bg-enabled" onchange="toggleBg()"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Node Count</div></div>
+                <div style="flex:1;max-width:220px;padding-left:2rem;">
+                  <input type="range" min="20" max="120" value="60" oninput="nodeCount=this.value;document.getElementById('nc-val').textContent=this.value;initCanvas()">
+                  <div class="range-labels"><span>20</span><span id="nc-val">60</span><span>120</span></div>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><div class="setting-label">Connection Speed</div></div>
+                <div style="flex:1;max-width:220px;padding-left:2rem;">
+                  <input type="range" min="1" max="10" value="4">
+                  <div class="range-labels"><span>Slow</span><span>Fast</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="save-settings-btn" onclick="saveSettings()">💾 Save Appearance</button>
+        </div>
+
+      </div><!-- end admin-content -->
+    </div><!-- end admin-layout -->
+  </div><!-- end admin-dashboard -->
+</div><!-- end page-admin -->
+
+<!-- Toast -->
+<div id="toast">✓ Settings saved!</div>
+
+<script>
+// ===== CANVAS CONNECTIONS BACKGROUND =====
+let nodeCount = 60;
+let animEnabled = true;
+const canvas = document.getElementById('connections-canvas');
+const ctx = canvas.getContext('2d');
+let nodes = [];
+let animFrame;
+
+function initCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  nodes = [];
+  for (let i = 0; i < nodeCount; i++) {
+    nodes.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 2.5 + 1
+    });
+  }
+}
+
+function drawCanvas() {
+  if (!animEnabled) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw connections
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const maxDist = 140;
+      if (dist < maxDist) {
+        const alpha = (1 - dist/maxDist) * 0.25;
+        ctx.strokeStyle = `rgba(0,212,255,${alpha})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw nodes
+  nodes.forEach(n => {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,212,255,0.5)';
+    ctx.fill();
+
+    // Move
+    n.x += n.vx;
+    n.y += n.vy;
+    if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+    if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+  });
+
+  animFrame = requestAnimationFrame(drawCanvas);
+}
+
+function toggleBg() {
+  animEnabled = document.getElementById('bg-enabled').checked;
+  if (animEnabled) { cancelAnimationFrame(animFrame); drawCanvas(); }
+  else { cancelAnimationFrame(animFrame); ctx.clearRect(0,0,canvas.width,canvas.height); }
+}
+
+window.addEventListener('resize', () => { initCanvas(); });
+initCanvas();
+drawCanvas();
+
+// ===== PAGE NAV =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  window.scrollTo(0, 0);
+}
+
+function openDiscord() {
+  const link = document.getElementById('s-discord') ? document.getElementById('s-discord').value : 'https://discord.gg/devlink';
+  window.open(link, '_blank');
+}
+
+// ===== PORTFOLIO =====
+function updatePreview() {
+  const val = document.getElementById('pf-subdomain').value || 'cooldev123';
+  document.getElementById('preview-sub').textContent = val;
+}
+
+function toggleSkill(el) {
+  el.classList.toggle('selected');
+}
+
+let selectedRole = 'dev';
+function selectRole(el, role) {
+  document.querySelectorAll('.role-option').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = role;
+}
+
+function submitPortfolio() {
+  const name = document.getElementById('pf-name').value;
+  const sub = document.getElementById('pf-subdomain').value;
+  if (!name || !sub) { alert('Please fill in your display name and subdomain!'); return; }
+
+  const skills = [...document.querySelectorAll('.skill-tag.selected')].map(s => s.textContent);
+  const role = selectedRole === 'dev' ? 'Developer' : 'Hirer';
+
+  // Add to list
+  const list = document.getElementById('portfolio-list');
+  const card = document.createElement('div');
+  card.className = 'portfolio-mini';
+  card.innerHTML = `
+    <div class="pm-name">${name}</div>
+    <div class="pm-role">${skills[0] || 'Developer'} • ${document.getElementById('pf-avail').value}</div>
+    <div class="pm-skills">${skills.slice(0,3).map(s=>`<span class="pm-skill">${s}</span>`).join('')}</div>
+    <div class="pm-actions"><button class="action-btn">View</button><button class="action-btn">Discord</button></div>
+  `;
+  list.prepend(card);
+
+  showToast(`✓ Portfolio created! devlink.gg/${sub}`);
+  document.getElementById('pf-name').value = '';
+  document.getElementById('pf-subdomain').value = '';
+  document.getElementById('pf-bio').value = '';
+  updatePreview();
+}
+
+// ===== ADMIN =====
+function adminLogin() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === 'admin123') {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  document.getElementById('admin-dashboard').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('admin-pass').value = '';
+}
+
+function adminTab(name, el) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function saveSettings() {
+  // Apply stat changes to homepage
+  const m = document.getElementById('s-members');
+  const j = document.getElementById('s-jobs');
+  const h = document.getElementById('s-hired');
+  if (m) document.getElementById('memberCount').textContent = m.value;
+  if (j) document.getElementById('jobCount').textContent = j.value;
+  if (h) document.getElementById('hiredCount').textContent = h.value;
+
+  showToast('✓ Settings saved!');
+}
+
+function updateColor(variable, value) {
+  document.documentElement.style.setProperty(variable, value);
+}
+
+function showToast(msg = '✓ Saved!') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
