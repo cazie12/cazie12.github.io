@@ -227,6 +227,20 @@ select.fi{cursor:pointer;}
 @media(max-width:700px){.admin-sidebar{display:none;}.admin-content{max-width:100%;}.stats-row{gap:2rem;}}
 </style>
 <style id="custom-css-tag"></style>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCqcA1btTrfXy3vMN5Y4cWL-KfBi7C2Bes",
+    authDomain: "devlink-23520.firebaseapp.com",
+    projectId: "devlink-23520",
+    storageBucket: "devlink-23520.firebasestorage.app",
+    messagingSenderId: "311157085755",
+    appId: "1:311157085755:web:985b714605cdcb2818ee1e"
+  });
+</script>
 </head>
 <body>
 <canvas id="connections-canvas"></canvas>
@@ -732,12 +746,43 @@ let CFG = {
   customCSS:'',
 };
 
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
+// ─── STORAGE (Firebase Firestore compat) ─────────────────────────────────────
+function parseKey(k) {
+  const parts = k.split(':');
+  if (parts.length >= 2) return { col: parts[0], id: parts.slice(1).join('_') };
+  return { col: 'devlink', id: k };
+}
+
+const db = firebase.firestore();
+
 const S = {
-  async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null;}catch{return null;}},
-  async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true);return true;}catch(e){console.error(e);return false;}},
-  async del(k){try{await window.storage.delete(k,true);}catch{}},
-  async list(p){try{const r=await window.storage.list(p,true);return r?r.keys:[];}catch{return[];}},
+  async get(k) {
+    try {
+      const { col, id } = parseKey(k);
+      const snap = await db.collection(col).doc(id).get();
+      return snap.exists ? snap.data().value : null;
+    } catch(e) { console.error('get error', e); return null; }
+  },
+  async set(k, v) {
+    try {
+      const { col, id } = parseKey(k);
+      await db.collection(col).doc(id).set({ value: v, updatedAt: Date.now() });
+      return true;
+    } catch(e) { console.error('set error', e); return false; }
+  },
+  async del(k) {
+    try {
+      const { col, id } = parseKey(k);
+      await db.collection(col).doc(id).delete();
+    } catch(e) { console.error('del error', e); }
+  },
+  async list(prefix) {
+    try {
+      const col = prefix.replace(/:$/, '');
+      const snap = await db.collection(col).get();
+      return snap.docs.map(d => col + ':' + d.id);
+    } catch(e) { console.error('list error', e); return []; }
+  },
 };
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
