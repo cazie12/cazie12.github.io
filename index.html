@@ -753,37 +753,69 @@ function parseKey(k) {
   return { col: 'devlink', id: k };
 }
 
-const db = firebase.firestore();
+// db initialized lazily on first use so Firebase SDK is definitely ready
+let _db = null;
+function getDb() {
+  if (!_db) _db = firebase.firestore();
+  return _db;
+}
 
 const S = {
   async get(k) {
     try {
       const { col, id } = parseKey(k);
-      const snap = await db.collection(col).doc(id).get();
+      const snap = await getDb().collection(col).doc(id).get();
       return snap.exists ? snap.data().value : null;
-    } catch(e) { console.error('get error', e); return null; }
+    } catch(e) {
+      console.error('[DevLink] Firestore GET failed:', k, e.code, e.message);
+      return null;
+    }
   },
   async set(k, v) {
     try {
       const { col, id } = parseKey(k);
-      await db.collection(col).doc(id).set({ value: v, updatedAt: Date.now() });
+      await getDb().collection(col).doc(id).set({ value: v, updatedAt: Date.now() });
       return true;
-    } catch(e) { console.error('set error', e); return false; }
+    } catch(e) {
+      console.error('[DevLink] Firestore SET failed:', k, e.code, e.message);
+      // Show a helpful message based on error type
+      if (e.code === 'permission-denied') {
+        showFirebaseError('Permission denied — Firestore rules are blocking writes. See instructions below.');
+      } else if (e.code === 'unavailable' || e.message.includes('network')) {
+        showFirebaseError('Network error — check your internet connection.');
+      } else {
+        showFirebaseError('Save failed: ' + (e.message || e.code || 'Unknown error'));
+      }
+      return false;
+    }
   },
   async del(k) {
     try {
       const { col, id } = parseKey(k);
-      await db.collection(col).doc(id).delete();
-    } catch(e) { console.error('del error', e); }
+      await getDb().collection(col).doc(id).delete();
+    } catch(e) { console.error('[DevLink] Firestore DEL failed:', k, e.code, e.message); }
   },
   async list(prefix) {
     try {
       const col = prefix.replace(/:$/, '');
-      const snap = await db.collection(col).get();
+      const snap = await getDb().collection(col).get();
       return snap.docs.map(d => col + ':' + d.id);
-    } catch(e) { console.error('list error', e); return []; }
+    } catch(e) {
+      console.error('[DevLink] Firestore LIST failed:', prefix, e.code, e.message);
+      return [];
+    }
   },
 };
+
+function showFirebaseError(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.innerHTML = '🔥 ' + msg + '<br><small style="opacity:0.8">Fix: Firebase Console → Firestore → Rules → set <code>allow read, write: if true;</code></small>';
+  t.className = 'err show';
+  t.style.maxWidth = '420px';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = ''; t.style.maxWidth = ''; t.innerHTML = ''; }, 10000);
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init(){
@@ -1297,7 +1329,7 @@ function toast(msg,err=0){
   t.className=err?'err show':'show';clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3500);
 }
 
-init();
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
