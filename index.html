@@ -3,240 +3,293 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DevLink — Roblox Developer Network</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title id="page-title">DevLink — Roblox Developer Network</title>
+<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#080c14;--surface:#0e1420;--surface2:#151d2e;--border:#1e2d47;
-    --accent:#00d4ff;--accent2:#7c3aed;--accent3:#f59e0b;
-    --text:#e8f0fe;--muted:#6b7fa3;--success:#10b981;--danger:#ef4444;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-  #connections-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
-  .page{display:none;position:relative;z-index:1;min-height:100vh;}
-  .page.active{display:block;}
+:root {
+  --bg:#080c14;--surface:#0e1420;--surface2:#151d2e;--border:#1e2d47;
+  --accent:#00d4ff;--accent2:#7c3aed;--accent3:#f59e0b;
+  --text:#e8f0fe;--muted:#6b7fa3;--success:#10b981;--danger:#ef4444;
+  --nav-bg:rgba(8,12,20,0.9);--card-radius:16px;--btn-radius:10px;
+  --body-font:'Syne',sans-serif;--mono-font:'Space Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--body-font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+#connections-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.page{display:none;position:relative;z-index:1;min-height:100vh;}
+.page.active{display:block;}
 
-  /* NAV */
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:rgba(8,12,20,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
-  .nav-logo{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:700;color:var(--accent);cursor:pointer;}
-  .nav-logo span{color:var(--text);}
-  .nav-links{display:flex;gap:0.5rem;align-items:center;}
-  .nav-btn{padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.875rem;font-weight:600;transition:all 0.2s;background:transparent;color:var(--muted);}
-  .nav-btn:hover{color:var(--text);background:var(--surface2);}
-  .nav-btn.anav{color:var(--accent);}
-  .nav-discord{background:#5865F2;color:#fff;padding:0.5rem 1.25rem;border-radius:6px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;}
-  .nav-discord:hover{background:#4752c4;}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:var(--mono-font);font-size:1.25rem;font-weight:700;color:var(--accent);cursor:pointer;letter-spacing:-0.5px;}
+.nav-logo span{color:var(--text);}
+.nav-links{display:flex;gap:0.5rem;align-items:center;}
+.nav-btn{padding:0.5rem 1.1rem;border-radius:6px;border:none;cursor:pointer;font-family:var(--body-font);font-size:0.875rem;font-weight:600;transition:all 0.2s;background:transparent;color:var(--muted);}
+.nav-btn:hover{color:var(--text);background:var(--surface2);}
+.nav-btn.anav{color:var(--accent);}
+.nav-discord{background:#5865F2;color:#fff;padding:0.5rem 1.25rem;border-radius:var(--btn-radius);border:none;cursor:pointer;font-family:var(--body-font);font-size:0.8rem;font-weight:700;transition:all 0.2s;}
+.nav-discord:hover{background:#4752c4;}
 
-  /* HOME */
-  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;}
-  .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:var(--accent);padding:0.35rem 1rem;border-radius:999px;font-size:0.8rem;font-family:'Space Mono',monospace;margin-bottom:2rem;}
-  .hero-badge::before{content:'●';font-size:0.5rem;animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-  .hero h1{font-size:clamp(3rem,8vw,6.5rem);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:1.5rem;animation:fadeUp 0.6s 0.1s ease both;}
-  .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-  .hero>p{font-size:1.2rem;color:var(--muted);max-width:560px;line-height:1.7;margin-bottom:3rem;animation:fadeUp 0.6s 0.2s ease both;}
-  .hero-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.6s 0.3s ease both;}
-  .btn-discord{display:inline-flex;align-items:center;gap:0.75rem;background:#5865F2;color:#fff;padding:0.9rem 2rem;border-radius:10px;font-size:1rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;font-family:'Syne',sans-serif;}
-  .btn-discord:hover{background:#4752c4;transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,101,242,0.4);}
-  .btn-outline{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;color:var(--text);padding:0.9rem 2rem;border-radius:10px;font-size:1rem;font-weight:700;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;font-family:'Syne',sans-serif;}
-  .btn-outline:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
-  .stats-row{display:flex;gap:4rem;margin-top:5rem;animation:fadeUp 0.6s 0.4s ease both;}
-  .stat{text-align:center;}
-  .stat-num{font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;color:var(--accent);}
-  .stat-label{font-size:0.85rem;color:var(--muted);margin-top:0.25rem;}
+/* HOME */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:var(--accent);padding:0.35rem 1rem;border-radius:999px;font-size:0.8rem;font-family:var(--mono-font);margin-bottom:2rem;}
+.hero-badge::before{content:'●';font-size:0.5rem;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.hero h1{font-size:clamp(3rem,8vw,6.5rem);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:1.5rem;animation:fadeUp 0.6s 0.1s ease both;}
+.grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero>p{font-size:1.2rem;color:var(--muted);max-width:560px;line-height:1.7;margin-bottom:3rem;animation:fadeUp 0.6s 0.2s ease both;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.6s 0.3s ease both;}
+.btn-discord{display:inline-flex;align-items:center;gap:0.75rem;background:#5865F2;color:#fff;padding:0.9rem 2rem;border-radius:var(--btn-radius);font-size:1rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;font-family:var(--body-font);}
+.btn-discord:hover{background:#4752c4;transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,101,242,0.4);}
+.btn-outline{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;color:var(--text);padding:0.9rem 2rem;border-radius:var(--btn-radius);font-size:1rem;font-weight:700;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;font-family:var(--body-font);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+.stats-row{display:flex;gap:4rem;margin-top:5rem;animation:fadeUp 0.6s 0.4s ease both;flex-wrap:wrap;justify-content:center;}
+.stat{text-align:center;}
+.stat-num{font-family:var(--mono-font);font-size:2rem;font-weight:700;color:var(--accent);}
+.stat-label{font-size:0.85rem;color:var(--muted);margin-top:0.25rem;}
+.section{padding:6rem 2rem;max-width:1100px;margin:0 auto;}
+.section-label{font-family:var(--mono-font);font-size:0.75rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;}
+.section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-1px;margin-bottom:1rem;}
+.section-sub{color:var(--muted);font-size:1rem;max-width:500px;line-height:1.7;margin-bottom:3rem;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:2rem;transition:all 0.3s;position:relative;overflow:hidden;}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity 0.3s;}
+.feature-card:hover{border-color:rgba(0,212,255,0.3);transform:translateY(-4px);}
+.feature-card:hover::before{opacity:1;}
+.feature-icon{font-size:2rem;margin-bottom:1rem;width:56px;height:56px;background:rgba(0,212,255,0.08);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,212,255,0.15);}
+.feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;}
+.feature-card p{color:var(--muted);font-size:0.9rem;line-height:1.6;}
+.discord-cta{background:linear-gradient(135deg,rgba(88,101,242,0.15),rgba(124,58,237,0.1));border:1px solid rgba(88,101,242,0.3);border-radius:24px;padding:4rem 3rem;text-align:center;max-width:700px;margin:0 auto 6rem;}
+.discord-cta h2{font-size:2.5rem;font-weight:800;letter-spacing:-1px;margin-bottom:1rem;}
+.discord-cta p{color:var(--muted);margin-bottom:2rem;line-height:1.7;}
 
-  .section{padding:6rem 2rem;max-width:1100px;margin:0 auto;}
-  .section-label{font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;}
-  .section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-1px;margin-bottom:1rem;}
-  .section-sub{color:var(--muted);font-size:1rem;max-width:500px;line-height:1.7;margin-bottom:3rem;}
-  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
-  .feature-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all 0.3s;position:relative;overflow:hidden;}
-  .feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity 0.3s;}
-  .feature-card:hover{border-color:rgba(0,212,255,0.3);transform:translateY(-4px);}
-  .feature-card:hover::before{opacity:1;}
-  .feature-icon{font-size:2rem;margin-bottom:1rem;width:56px;height:56px;background:rgba(0,212,255,0.08);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,212,255,0.15);}
-  .feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;}
-  .feature-card p{color:var(--muted);font-size:0.9rem;line-height:1.6;}
-  .discord-cta{background:linear-gradient(135deg,rgba(88,101,242,0.15),rgba(124,58,237,0.1));border:1px solid rgba(88,101,242,0.3);border-radius:24px;padding:4rem 3rem;text-align:center;max-width:700px;margin:0 auto 6rem;}
-  .discord-cta h2{font-size:2.5rem;font-weight:800;letter-spacing:-1px;margin-bottom:1rem;}
-  .discord-cta p{color:var(--muted);margin-bottom:2rem;line-height:1.7;}
+/* PORTFOLIO */
+.portfolio-hero{padding:8rem 2rem 3rem;max-width:900px;margin:0 auto;text-align:center;}
+.portfolio-hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:800;letter-spacing:-1.5px;margin-bottom:1rem;}
+.portfolio-hero>p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:500px;margin:0 auto 3rem;}
+.form-container{max-width:700px;margin:0 auto;padding:0 2rem 6rem;}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;}
+.fsec{font-size:0.75rem;font-family:var(--mono-font);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin:2rem 0 1rem;padding-top:2rem;border-top:1px solid var(--border);}
+.fsec:first-child{margin-top:0;padding-top:0;border-top:none;}
+.form-group{margin-bottom:1.25rem;}
+.form-group label{display:block;font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;}
+.form-group label span{color:var(--muted);font-weight:400;font-size:0.8rem;}
+.fi,.fta,.fsel{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:0.75rem 1rem;border-radius:10px;font-family:var(--body-font);font-size:0.9rem;outline:none;transition:border-color 0.2s;}
+.fi:focus,.fta:focus,.fsel:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,0.08);}
+.fta{resize:vertical;min-height:120px;}
+.sub-row{display:flex;align-items:center;}
+.sub-prefix{background:var(--surface2);border:1px solid var(--border);border-right:none;border-radius:10px 0 0 10px;padding:0.75rem 1rem;color:var(--muted);font-size:0.9rem;white-space:nowrap;font-family:var(--mono-font);}
+.sub-input{border-radius:0 10px 10px 0!important;font-family:var(--mono-font)!important;}
+.pf-preview{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-top:0.75rem;font-family:var(--mono-font);font-size:0.85rem;color:var(--muted);}
+.pf-preview span{color:var(--accent);}
+.skills-grid{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.stag{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;transition:all 0.2s;color:var(--muted);user-select:none;}
+.stag.sel{background:rgba(0,212,255,0.12);border-color:var(--accent);color:var(--accent);}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+.role-opt{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;cursor:pointer;transition:all 0.2s;text-align:center;}
+.role-opt:hover{border-color:var(--accent);}
+.role-opt.sel{background:rgba(0,212,255,0.08);border-color:var(--accent);color:var(--accent);}
+.role-opt .ri{font-size:1.5rem;margin-bottom:0.25rem;}
+.role-opt .rn{font-size:0.85rem;font-weight:700;}
+.role-opt .rd{font-size:0.75rem;color:var(--muted);margin-top:0.2rem;}
+.btn-sub{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:1rem;border-radius:var(--btn-radius);font-family:var(--body-font);font-size:1rem;font-weight:700;cursor:pointer;margin-top:2rem;transition:all 0.2s;}
+.btn-sub:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,212,255,0.25);}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;background:var(--border);border-radius:999px;outline:none;margin:0.5rem 0;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.rl{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);}
+.pf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:1.5rem;}
+.pf-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;transition:all 0.2s;}
+.pf-card:hover{border-color:rgba(0,212,255,0.3);}
+.pn{font-size:0.95rem;font-weight:700;margin-bottom:0.2rem;}
+.pr{font-size:0.75rem;color:var(--accent);margin-bottom:0.6rem;font-family:var(--mono-font);}
+.pb{font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:0.75rem;}
+.ps{display:flex;flex-wrap:wrap;gap:0.3rem;}
+.psk{background:var(--surface2);border-radius:4px;padding:0.2rem 0.5rem;font-size:0.7rem;color:var(--muted);}
+.pa{margin-top:0.75rem;display:flex;gap:0.5rem;}
+.empty-st{text-align:center;padding:3rem 1rem;color:var(--muted);}
+.empty-st .ei{font-size:2.5rem;margin-bottom:1rem;}
 
-  /* PORTFOLIO */
-  .portfolio-hero{padding:8rem 2rem 3rem;max-width:900px;margin:0 auto;text-align:center;}
-  .portfolio-hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:800;letter-spacing:-1.5px;margin-bottom:1rem;}
-  .portfolio-hero p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:500px;margin:0 auto 3rem;}
-  .form-container{max-width:700px;margin:0 auto;padding:0 2rem 6rem;}
-  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;}
-  .fsec{font-size:0.75rem;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin:2rem 0 1rem;padding-top:2rem;border-top:1px solid var(--border);}
-  .fsec:first-child{margin-top:0;padding-top:0;border-top:none;}
-  .form-group{margin-bottom:1.25rem;}
-  .form-group label{display:block;font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;}
-  .form-group label span{color:var(--muted);font-weight:400;font-size:0.8rem;}
-  .fi,.fta,.fsel{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:0.75rem 1rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.2s;}
-  .fi:focus,.fta:focus,.fsel:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,0.08);}
-  .fta{resize:vertical;min-height:120px;}
-  .sub-row{display:flex;align-items:center;}
-  .sub-prefix{background:var(--surface2);border:1px solid var(--border);border-right:none;border-radius:10px 0 0 10px;padding:0.75rem 1rem;color:var(--muted);font-size:0.9rem;white-space:nowrap;font-family:'Space Mono',monospace;}
-  .sub-input{border-radius:0 10px 10px 0!important;font-family:'Space Mono',monospace!important;}
-  .pf-preview{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-top:0.75rem;font-family:'Space Mono',monospace;font-size:0.85rem;color:var(--muted);}
-  .pf-preview span{color:var(--accent);}
-  .skills-grid{display:flex;flex-wrap:wrap;gap:0.5rem;}
-  .stag{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;transition:all 0.2s;color:var(--muted);user-select:none;}
-  .stag.sel{background:rgba(0,212,255,0.12);border-color:var(--accent);color:var(--accent);}
-  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
-  .role-opt{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;cursor:pointer;transition:all 0.2s;text-align:center;}
-  .role-opt:hover{border-color:var(--accent);}
-  .role-opt.sel{background:rgba(0,212,255,0.08);border-color:var(--accent);color:var(--accent);}
-  .role-opt .ri{font-size:1.5rem;margin-bottom:0.25rem;}
-  .role-opt .rn{font-size:0.85rem;font-weight:700;}
-  .role-opt .rd{font-size:0.75rem;color:var(--muted);margin-top:0.2rem;}
-  .btn-sub{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:1rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:2rem;transition:all 0.2s;}
-  .btn-sub:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,212,255,0.25);}
-  input[type="range"]{-webkit-appearance:none;width:100%;height:4px;background:var(--border);border-radius:999px;outline:none;margin:0.5rem 0;}
-  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
-  .rl{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);}
-  .pf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:1.5rem;}
-  .pf-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;transition:all 0.2s;}
-  .pf-card:hover{border-color:rgba(0,212,255,0.3);}
-  .pn{font-size:0.95rem;font-weight:700;margin-bottom:0.2rem;}
-  .pr{font-size:0.75rem;color:var(--accent);margin-bottom:0.6rem;font-family:'Space Mono',monospace;}
-  .pb{font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:0.75rem;}
-  .ps{display:flex;flex-wrap:wrap;gap:0.3rem;}
-  .psk{background:var(--surface2);border-radius:4px;padding:0.2rem 0.5rem;font-size:0.7rem;color:var(--muted);}
-  .pa{margin-top:0.75rem;display:flex;gap:0.5rem;}
-  .empty-st{text-align:center;padding:3rem 1rem;color:var(--muted);}
-  .empty-st .ei{font-size:2.5rem;margin-bottom:1rem;}
+/* ADMIN */
+.admin-layout{display:flex;min-height:100vh;padding-top:65px;}
+.admin-sidebar{width:250px;background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 1rem;position:sticky;top:65px;height:calc(100vh - 65px);overflow-y:auto;flex-shrink:0;}
+.sl-sec{margin-bottom:1.5rem;}
+.sl-lbl{font-size:0.65rem;font-family:var(--mono-font);color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:0 0.75rem;margin-bottom:0.5rem;}
+.sl-item{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.75rem;border-radius:8px;cursor:pointer;transition:all 0.15s;font-size:0.85rem;color:var(--muted);border:none;background:none;width:100%;text-align:left;font-family:var(--body-font);font-weight:600;}
+.sl-item:hover{background:var(--surface2);color:var(--text);}
+.sl-item.active{background:rgba(0,212,255,0.1);color:var(--accent);}
+.admin-content{flex:1;padding:2.5rem;overflow-y:auto;max-width:calc(100vw - 250px);}
+.adm-hd{margin-bottom:2rem;}
+.adm-hd h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;}
+.adm-hd p{color:var(--muted);font-size:0.875rem;margin-top:0.25rem;}
+.adm-panel{display:none;}
+.adm-panel.active{display:block;}
 
-  /* ADMIN */
-  .admin-layout{display:flex;min-height:100vh;padding-top:65px;}
-  .admin-sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);padding:2rem 1rem;position:sticky;top:65px;height:calc(100vh - 65px);overflow-y:auto;flex-shrink:0;}
-  .sl-sec{margin-bottom:2rem;}
-  .sl-lbl{font-size:0.65rem;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:0 0.75rem;margin-bottom:0.5rem;}
-  .sl-item{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.75rem;border-radius:8px;cursor:pointer;transition:all 0.15s;font-size:0.875rem;color:var(--muted);border:none;background:none;width:100%;text-align:left;font-family:'Syne',sans-serif;font-weight:600;}
-  .sl-item:hover{background:var(--surface2);color:var(--text);}
-  .sl-item.active{background:rgba(0,212,255,0.1);color:var(--accent);}
-  .admin-content{flex:1;padding:2.5rem;overflow-y:auto;}
-  .adm-hd{margin-bottom:2.5rem;}
-  .adm-hd h1{font-size:1.8rem;font-weight:800;letter-spacing:-0.5px;}
-  .adm-hd p{color:var(--muted);font-size:0.9rem;margin-top:0.25rem;}
-  .adm-panel{display:none;}
-  .adm-panel.active{display:block;}
-  .sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.25rem;margin-bottom:2.5rem;}
-  .sc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;}
-  .sc .sl{font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;}
-  .sc .sv{font-size:2rem;font-weight:800;font-family:'Space Mono',monospace;}
-  .sc .ss{font-size:0.75rem;color:var(--muted);margin-top:0.25rem;}
-  table.dt{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-  table.dt th{text-align:left;padding:0.875rem 1.25rem;font-size:0.75rem;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border);}
-  table.dt td{padding:1rem 1.25rem;font-size:0.875rem;border-bottom:1px solid var(--border);color:var(--text);}
-  table.dt tr:last-child td{border-bottom:none;}
-  table.dt tr:hover td{background:rgba(255,255,255,0.02);}
-  .te{text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;}
-  .badge{display:inline-block;padding:0.2rem 0.65rem;border-radius:999px;font-size:0.7rem;font-weight:700;font-family:'Space Mono',monospace;}
-  .bg{background:rgba(16,185,129,0.15);color:var(--success);}
-  .by{background:rgba(245,158,11,0.15);color:var(--accent3);}
-  .br{background:rgba(239,68,68,0.15);color:var(--danger);}
-  .bb{background:rgba(0,212,255,0.15);color:var(--accent);}
-  .abtn{padding:0.3rem 0.75rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:0.75rem;cursor:pointer;transition:all 0.15s;font-family:'Syne',sans-serif;font-weight:600;}
-  .abtn:hover{border-color:var(--accent);color:var(--accent);}
-  .abtn.ok{border-color:var(--success);color:var(--success);}
-  .abtn.ok:hover{background:rgba(16,185,129,0.1);}
-  .abtn.bad:hover{border-color:var(--danger);color:var(--danger);}
-  .sg{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-  .scard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem;}
-  .scard.full{grid-column:1/-1;}
-  .scard h3{font-size:0.95rem;font-weight:700;margin-bottom:0.25rem;}
-  .scard .sd{font-size:0.8rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.5;}
-  .si{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--border);gap:1rem;}
-  .si:last-child{border-bottom:none;padding-bottom:0;}
-  .si:first-child{padding-top:0;}
-  .sil{flex:1;}
-  .sil .sln{font-size:0.875rem;font-weight:600;}
-  .sil .sld{font-size:0.775rem;color:var(--muted);margin-top:0.15rem;}
-  .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
-  .toggle input{opacity:0;width:0;height:0;}
-  .tslide{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:999px;transition:0.3s;}
-  .tslide:before{position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s;}
-  .toggle input:checked + .tslide{background:var(--accent);}
-  .toggle input:checked + .tslide:before{transform:translateX(20px);}
-  .cr{display:flex;gap:0.5rem;align-items:center;}
-  .cr input[type="color"]{width:40px;height:36px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;padding:2px;}
-  .sbtn{background:var(--accent);color:#000;border:none;padding:0.75rem 1.75rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:1.5rem;transition:all 0.2s;}
-  .sbtn:hover{background:#00bfef;transform:translateY(-1px);}
-  #admin-login{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 65px);padding:2rem;}
-  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:400px;}
-  .login-card h2{font-size:1.5rem;font-weight:800;margin-bottom:0.25rem;}
-  .login-card p{color:var(--muted);font-size:0.85rem;margin-bottom:2rem;}
-  .lerr{color:var(--danger);font-size:0.8rem;margin-top:0.5rem;display:none;}
-  #toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface);border:1px solid var(--success);color:var(--success);padding:0.875rem 1.5rem;border-radius:10px;font-size:0.875rem;font-weight:600;transform:translateY(100px);opacity:0;transition:all 0.3s;max-width:320px;}
-  #toast.err{border-color:var(--danger);color:var(--danger);}
-  #toast.show{transform:none;opacity:1;}
-  .loading{color:var(--muted);font-size:0.85rem;padding:1.5rem;text-align:center;}
-  @media(max-width:768px){.sg{grid-template-columns:1fr;}.admin-sidebar{display:none;}.stats-row{gap:2rem;}}
+/* Stat cards */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;}
+.sc .sl{font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem;}
+.sc .sv{font-size:1.8rem;font-weight:800;font-family:var(--mono-font);}
+.sc .ss{font-size:0.7rem;color:var(--muted);margin-top:0.2rem;}
+
+/* Tables */
+table.dt{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+table.dt th{text-align:left;padding:0.75rem 1rem;font-size:0.7rem;font-family:var(--mono-font);color:var(--muted);letter-spacing:1px;text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border);}
+table.dt td{padding:0.875rem 1rem;font-size:0.85rem;border-bottom:1px solid var(--border);color:var(--text);}
+table.dt tr:last-child td{border-bottom:none;}
+table.dt tr:hover td{background:rgba(255,255,255,0.02);}
+.te{text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem;}
+.badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.7rem;font-weight:700;font-family:var(--mono-font);}
+.bg{background:rgba(16,185,129,0.15);color:var(--success);}
+.by{background:rgba(245,158,11,0.15);color:var(--accent3);}
+.br{background:rgba(239,68,68,0.15);color:var(--danger);}
+.bb{background:rgba(0,212,255,0.15);color:var(--accent);}
+.abtn{padding:0.3rem 0.7rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:0.75rem;cursor:pointer;transition:all 0.15s;font-family:var(--body-font);font-weight:600;white-space:nowrap;}
+.abtn:hover{border-color:var(--accent);color:var(--accent);}
+.abtn.ok{border-color:var(--success);color:var(--success);}
+.abtn.ok:hover{background:rgba(16,185,129,0.1);}
+.abtn.bad:hover{border-color:var(--danger);color:var(--danger);}
+
+/* Settings */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;}
+.scard.full{grid-column:1/-1;}
+.scard h3{font-size:0.9rem;font-weight:700;margin-bottom:0.2rem;}
+.scard .sd{font-size:0.78rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.5;}
+.si{display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0;border-bottom:1px solid var(--border);gap:1rem;}
+.si:last-child{border-bottom:none;padding-bottom:0;}
+.si:first-child{padding-top:0;}
+.sil{flex:1;min-width:0;}
+.sil .sln{font-size:0.85rem;font-weight:600;}
+.sil .sld{font-size:0.75rem;color:var(--muted);margin-top:0.1rem;}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.tslide{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:999px;transition:0.3s;}
+.tslide:before{position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s;}
+.toggle input:checked+.tslide{background:var(--accent);}
+.toggle input:checked+.tslide:before{transform:translateX(20px);}
+.cr{display:flex;gap:0.5rem;align-items:center;}
+.cr input[type="color"]{width:38px;height:34px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;}
+.sbtn{background:var(--accent);color:#000;border:none;padding:0.7rem 1.5rem;border-radius:var(--btn-radius);font-family:var(--body-font);font-size:0.875rem;font-weight:700;cursor:pointer;margin-top:1.25rem;transition:all 0.2s;}
+.sbtn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.sbtn.danger{background:var(--danger);color:#fff;}
+
+/* Login */
+#admin-login{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 65px);padding:2rem;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:400px;}
+.login-card h2{font-size:1.5rem;font-weight:800;margin-bottom:0.25rem;}
+.login-card p{color:var(--muted);font-size:0.85rem;margin-bottom:2rem;}
+.lerr{color:var(--danger);font-size:0.8rem;margin-top:0.5rem;display:none;}
+#toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--surface);border:1px solid var(--success);color:var(--success);padding:0.875rem 1.5rem;border-radius:10px;font-size:0.875rem;font-weight:600;transform:translateY(100px);opacity:0;transition:all 0.3s;max-width:340px;}
+#toast.err{border-color:var(--danger);color:var(--danger);}
+#toast.show{transform:none;opacity:1;}
+.loading{color:var(--muted);font-size:0.85rem;padding:1.5rem;text-align:center;}
+
+/* Customizer specific */
+.tab-bar{display:flex;gap:0.25rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0;}
+.tab-btn{padding:0.6rem 1rem;border:none;background:none;color:var(--muted);font-family:var(--body-font);font-size:0.85rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.fc-row{display:flex;align-items:flex-start;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--border);gap:1rem;}
+.fc-row:last-child{border-bottom:none;}
+.fc-label{font-size:0.85rem;font-weight:600;margin-bottom:0.15rem;}
+.fc-desc{font-size:0.75rem;color:var(--muted);}
+.fc-ctrl{flex-shrink:0;display:flex;align-items:center;gap:0.5rem;}
+.fc-ctrl .fi{background:var(--bg);}
+.fi-sm{width:130px!important;}
+.fi-md{width:180px!important;}
+.fi-lg{width:220px!important;}
+.fi-xl{width:280px!important;}
+
+.font-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-top:0.5rem;}
+.font-opt{padding:0.6rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;text-align:center;font-size:0.8rem;transition:all 0.2s;background:var(--bg);}
+.font-opt:hover{border-color:var(--accent);}
+.font-opt.sel{border-color:var(--accent);background:rgba(0,212,255,0.08);color:var(--accent);}
+
+.feature-editor{display:flex;flex-direction:column;gap:0.75rem;}
+.feat-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+.feat-item-head{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;}
+.feat-item-head .emoji-input{width:52px;font-size:1.3rem;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem;}
+.feat-item-head .fi{flex:1;}
+.feat-item textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.6rem 0.75rem;border-radius:8px;font-family:var(--body-font);font-size:0.82rem;resize:none;outline:none;height:60px;}
+
+.preview-bar{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.82rem;color:var(--muted);}
+.preview-bar span{color:var(--accent);font-weight:700;}
+
+.css-editor{width:100%;min-height:180px;background:var(--bg);border:1px solid var(--border);color:#a8ff78;padding:1rem;border-radius:10px;font-family:var(--mono-font);font-size:0.8rem;resize:vertical;outline:none;line-height:1.6;}
+
+select.fi{cursor:pointer;}
+
+@media(max-width:900px){.sg{grid-template-columns:1fr;}.admin-sidebar{width:200px;}.admin-content{max-width:calc(100vw - 200px);}}
+@media(max-width:700px){.admin-sidebar{display:none;}.admin-content{max-width:100%;}.stats-row{gap:2rem;}}
 </style>
+<style id="custom-css-tag"></style>
 </head>
 <body>
 <canvas id="connections-canvas"></canvas>
 
 <nav>
-  <div class="nav-logo" onclick="goPage('home')">dev<span>link</span></div>
+  <div class="nav-logo" id="nav-logo-el" onclick="goPage('home')">dev<span id="nav-logo-span">link</span></div>
   <div class="nav-links">
-    <button class="nav-btn anav" id="nb-home" onclick="goPage('home')">Home</button>
+    <button class="nav-btn anav" id="nb-home" onclick="goPage('home')" id="nav-home-btn">Home</button>
     <button class="nav-btn" id="nb-portfolio" onclick="goPage('portfolio')">Portfolio</button>
     <button class="nav-btn" id="nb-admin" onclick="goPage('admin')">Admin</button>
-    <button class="nav-discord" onclick="openDiscord()">Join Discord</button>
+    <button class="nav-discord" id="nav-discord-btn" onclick="openDiscord()">Join Discord</button>
   </div>
 </nav>
 
 <!-- HOME -->
 <div id="page-home" class="page active">
   <div class="hero">
-    <div class="hero-badge">🎮 Roblox Developer Network</div>
-    <h1>Connect.<br><span class="grad">Get Hired.</span><br>Build.</h1>
-    <p>The #1 community for Roblox developers. Whether you're hiring talent or looking for your next gig — DevLink connects you.</p>
+    <div class="hero-badge" id="hero-badge-el">🎮 Roblox Developer Network</div>
+    <h1 id="hero-title-el">Connect.<br><span class="grad" id="hero-title-grad">Get Hired.</span><br>Build.</h1>
+    <p id="hero-sub-el">The #1 community for Roblox developers. Whether you're hiring talent or looking for your next gig — DevLink connects you.</p>
     <div class="hero-actions">
       <button class="btn-discord" onclick="openDiscord()">
         <svg width="20" height="15" viewBox="0 0 71 55" fill="white"><path d="M60.1 4.9A58.6 58.6 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A37.7 37.7 0 0 0 25.4.5a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.6 4.9a.2.2 0 0 0-.1.1C1.6 18-.9 30.8.3 43.4a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.3 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36.3 36.3 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-9 .2.2 0 0 0 .1-.2C72.1 28.8 68.3 16.1 60.2 5a.2.2 0 0 0-.1-.1zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.9 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
-        Join Our Discord
+        <span id="discord-btn-label">Join Our Discord</span>
       </button>
-      <button class="btn-outline" onclick="goPage('portfolio')">✦ Create Portfolio</button>
+      <button class="btn-outline" onclick="goPage('portfolio')" id="cta-btn-el">✦ Create Portfolio</button>
     </div>
     <div class="stats-row">
-      <div class="stat"><div class="stat-num" id="h-members">—</div><div class="stat-label">Total Members</div></div>
+      <div class="stat"><div class="stat-num" id="h-members">—</div><div class="stat-label" id="stat-label-members">Total Members</div></div>
       <div class="stat">
         <div class="stat-num" id="h-online" style="color:var(--success)">—</div>
         <div class="stat-label" style="display:flex;align-items:center;gap:0.4rem;justify-content:center">
           <span style="display:inline-block;width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite"></span>
-          Online Now
+          <span id="stat-label-online">Online Now</span>
         </div>
       </div>
-      <div class="stat"><div class="stat-num" id="h-portfolios">—</div><div class="stat-label">Portfolios</div></div>
-      <div class="stat"><div class="stat-num" id="h-hired">—</div><div class="stat-label">Hired This Month</div></div>
+      <div class="stat"><div class="stat-num" id="h-portfolios">—</div><div class="stat-label" id="stat-label-portfolios">Portfolios</div></div>
+      <div class="stat"><div class="stat-num" id="h-hired">—</div><div class="stat-label" id="stat-label-hired">Hired This Month</div></div>
     </div>
-    <p style="color:var(--muted);font-size:0.72rem;margin-top:1rem;font-family:Space Mono,monospace;opacity:0.6">↑ live from discord · updates every 60s</p>
+    <p style="color:var(--muted);font-size:0.72rem;margin-top:1rem;font-family:var(--mono-font);opacity:0.6">↑ live from discord · updates every 60s</p>
   </div>
+
   <div class="section">
-    <div class="section-label">Why DevLink</div>
-    <h2 class="section-title">Built for Roblox devs,<br>by Roblox devs.</h2>
-    <p class="section-sub">Everything you need to find your next opportunity or build your dream team.</p>
-    <div class="features-grid">
-      <div class="feature-card"><div class="feature-icon">🧑‍💻</div><h3>Dev Portfolios</h3><p>Create a portfolio with your own link. Show off projects, skills, and past work to potential hirers.</p></div>
-      <div class="feature-card"><div class="feature-icon">💼</div><h3>Job Board</h3><p>Browse curated job listings from verified Roblox studios. Filter by role and pay.</p></div>
-      <div class="feature-card"><div class="feature-icon">🔗</div><h3>Discord Integration</h3><p>Everything syncs with our Discord server. Get pinged when matching roles are posted.</p></div>
-      <div class="feature-card"><div class="feature-icon">⭐</div><h3>Verified Studios</h3><p>All hiring studios are manually verified. No scams — only legitimate opportunities.</p></div>
-      <div class="feature-card"><div class="feature-icon">💰</div><h3>Pay Transparency</h3><p>Every listing shows expected compensation upfront. Know your worth before applying.</p></div>
-      <div class="feature-card"><div class="feature-icon">🚀</div><h3>Instant Matching</h3><p>Our community connects hirers with the right devs based on skills and availability.</p></div>
+    <div class="section-label" id="features-eyebrow">Why DevLink</div>
+    <h2 class="section-title" id="features-title">Built for Roblox devs,<br>by Roblox devs.</h2>
+    <p class="section-sub" id="features-sub">Everything you need to find your next opportunity or build your dream team.</p>
+    <div class="features-grid" id="features-grid">
+      <div class="feature-card"><div class="feature-icon" id="f0-icon">🧑‍💻</div><h3 id="f0-title">Dev Portfolios</h3><p id="f0-desc">Create a portfolio with your own link. Show off projects, skills, and past work to potential hirers.</p></div>
+      <div class="feature-card"><div class="feature-icon" id="f1-icon">💼</div><h3 id="f1-title">Job Board</h3><p id="f1-desc">Browse curated job listings from verified Roblox studios. Filter by role and pay.</p></div>
+      <div class="feature-card"><div class="feature-icon" id="f2-icon">🔗</div><h3 id="f2-title">Discord Integration</h3><p id="f2-desc">Everything syncs with our Discord server. Get pinged when matching roles are posted.</p></div>
+      <div class="feature-card"><div class="feature-icon" id="f3-icon">⭐</div><h3 id="f3-title">Verified Studios</h3><p id="f3-desc">All hiring studios are manually verified. No scams — only legitimate opportunities.</p></div>
+      <div class="feature-card"><div class="feature-icon" id="f4-icon">💰</div><h3 id="f4-title">Pay Transparency</h3><p id="f4-desc">Every listing shows expected compensation upfront. Know your worth before applying.</p></div>
+      <div class="feature-card"><div class="feature-icon" id="f5-icon">🚀</div><h3 id="f5-title">Instant Matching</h3><p id="f5-desc">Our community connects hirers with the right devs based on skills and availability.</p></div>
     </div>
   </div>
+
   <div class="section">
     <div class="discord-cta">
-      <h2>Ready to level up?</h2>
-      <p>Join the DevLink Discord. Post jobs, find work, and connect with the community.</p>
+      <h2 id="cta-title">Ready to level up?</h2>
+      <p id="cta-body">Join the DevLink Discord. Post jobs, find work, and connect with the community.</p>
       <button class="btn-discord" onclick="openDiscord()" style="margin:0 auto;display:inline-flex;font-size:1rem;padding:1rem 2.5rem;">
         <svg width="20" height="15" viewBox="0 0 71 55" fill="white" style="margin-right:0.5rem"><path d="M60.1 4.9A58.6 58.6 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A37.7 37.7 0 0 0 25.4.5a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.6 4.9a.2.2 0 0 0-.1.1C1.6 18-.9 30.8.3 43.4a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.3 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36.3 36.3 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-9 .2.2 0 0 0 .1-.2C72.1 28.8 68.3 16.1 60.2 5a.2.2 0 0 0-.1-.1zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.9 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
-        Join DevLink Discord
+        <span id="cta-btn-label">Join DevLink Discord</span>
       </button>
     </div>
   </div>
@@ -260,23 +313,18 @@
       <div class="form-group"><label>Display Name</label><input class="fi" type="text" placeholder="e.g. CoolDev123" id="pf-name"></div>
       <div class="form-group">
         <label>Portfolio Slug <span>— your public link</span></label>
-        <div class="sub-row">
-          <div class="sub-prefix" id="base-display">devlink.gg/</div>
-          <input class="fi sub-input" type="text" placeholder="cooldev123" id="pf-slug" oninput="updPrev()">
-        </div>
+        <div class="sub-row"><div class="sub-prefix" id="base-display">devlink.gg/</div><input class="fi sub-input" type="text" placeholder="cooldev123" id="pf-slug" oninput="updPrev()"></div>
         <div class="pf-preview">Your link: <span id="prev-slug">devlink.gg/cooldev123</span></div>
       </div>
-      <div class="form-group"><label>Bio <span>— tell people about yourself</span></label><textarea class="fta" placeholder="Experienced Roblox scripter with 4 years building simulators..." id="pf-bio"></textarea></div>
+      <div class="form-group"><label>Bio</label><textarea class="fta" placeholder="Experienced Roblox scripter with 4 years building simulators..." id="pf-bio"></textarea></div>
       <div class="form-group"><label>Discord Username</label><input class="fi" type="text" placeholder="@yourname" id="pf-discord"></div>
-
       <div class="fsec">I am looking to…</div>
       <div class="role-grid">
         <div class="role-opt sel" onclick="selRole(this,'dev')"><div class="ri">🧑‍💻</div><div class="rn">Get Hired</div><div class="rd">I'm a developer</div></div>
         <div class="role-opt" onclick="selRole(this,'hirer')"><div class="ri">🏢</div><div class="rn">Hire Developers</div><div class="rd">I'm a studio / hirer</div></div>
       </div>
-
       <div class="fsec">Skills</div>
-      <div class="skills-grid">
+      <div class="skills-grid" id="skills-grid-pf">
         <div class="stag" onclick="tSkill(this)">Scripting (Lua)</div><div class="stag" onclick="tSkill(this)">Building</div>
         <div class="stag" onclick="tSkill(this)">UI Design</div><div class="stag" onclick="tSkill(this)">Animation</div>
         <div class="stag" onclick="tSkill(this)">VFX</div><div class="stag" onclick="tSkill(this)">GFX / Art</div>
@@ -284,7 +332,6 @@
         <div class="stag" onclick="tSkill(this)">Modeling (Blender)</div><div class="stag" onclick="tSkill(this)">Texturing</div>
         <div class="stag" onclick="tSkill(this)">Project Management</div><div class="stag" onclick="tSkill(this)">Marketing</div>
       </div>
-
       <div class="fsec">Experience & Links</div>
       <div class="form-group">
         <label>Years of Experience</label>
@@ -301,7 +348,6 @@
       <button class="btn-sub" onclick="submitPf()">✦ Submit Portfolio</button>
       <p style="text-align:center;color:var(--muted);font-size:0.8rem;margin-top:1rem;">Portfolios are reviewed by admins before going live.</p>
     </div>
-
     <div style="margin-top:3rem;">
       <div class="section-label">Community</div>
       <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:0.5rem;">Browse Developers</h3>
@@ -325,27 +371,35 @@
       <button class="btn-sub" onclick="doLogin()">Access Panel →</button>
     </div>
   </div>
+
   <div id="admin-dash" style="display:none;">
     <div class="admin-layout">
       <div class="admin-sidebar">
         <div class="sl-sec">
           <div class="sl-lbl">Overview</div>
           <button class="sl-item active" onclick="aTab('dashboard',this)">📊 Dashboard</button>
-          <button class="sl-item" onclick="aTab('pending',this)">⏳ Pending <span id="pbadge" style="margin-left:auto;background:var(--danger);color:#fff;border-radius:999px;padding:0.1rem 0.5rem;font-size:0.7rem;"></span></button>
+          <button class="sl-item" onclick="aTab('pending',this)">⏳ Pending <span id="pbadge" style="margin-left:auto;background:var(--danger);color:#fff;border-radius:999px;padding:0.1rem 0.45rem;font-size:0.68rem;"></span></button>
           <button class="sl-item" onclick="aTab('all',this)">👥 All Portfolios</button>
+        </div>
+        <div class="sl-sec">
+          <div class="sl-lbl">Customize</div>
+          <button class="sl-item" onclick="aTab('content',this)">✏️ Content</button>
+          <button class="sl-item" onclick="aTab('design',this)">🎨 Design</button>
+          <button class="sl-item" onclick="aTab('layout',this)">📐 Layout</button>
+          <button class="sl-item" onclick="aTab('advanced',this)">🧪 Advanced CSS</button>
         </div>
         <div class="sl-sec">
           <div class="sl-lbl">Config</div>
           <button class="sl-item" onclick="aTab('settings',this)">⚙️ Settings</button>
-          <button class="sl-item" onclick="aTab('appearance',this)">🎨 Appearance</button>
         </div>
         <div class="sl-sec">
           <button class="sl-item" onclick="doLogout()" style="color:var(--danger)">🚪 Logout</button>
         </div>
       </div>
+
       <div class="admin-content">
 
-        <!-- Dashboard -->
+        <!-- DASHBOARD -->
         <div class="adm-panel active" id="ap-dashboard">
           <div class="adm-hd"><h1>Dashboard</h1><p>Live overview of DevLink.</p></div>
           <div class="sc-grid">
@@ -354,211 +408,527 @@
             <div class="sc"><div class="sl">Pending</div><div class="sv" style="color:var(--accent3)" id="d-pending">—</div><div class="ss">needs review</div></div>
             <div class="sc"><div class="sl">Rejected</div><div class="sv" style="color:var(--danger)" id="d-rejected">—</div><div class="ss">all time</div></div>
           </div>
-          <div id="dash-discord-stats" style="background:rgba(88,101,242,0.08);border:1px solid rgba(88,101,242,0.25);border-radius:12px;padding:1rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <svg width="18" height="14" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.6 58.6 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A37.7 37.7 0 0 0 25.4.5a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.6 4.9a.2.2 0 0 0-.1.1C1.6 18-.9 30.8.3 43.4a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.3 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36.3 36.3 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-9 .2.2 0 0 0 .1-.2C72.1 28.8 68.3 16.1 60.2 5a.2.2 0 0 0-.1-.1zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.9 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
-            <span style="font-weight:700;font-size:0.9rem">Discord Live</span>
-            <span style="width:7px;height:7px;background:var(--success);border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+          <div style="background:rgba(88,101,242,0.08);border:1px solid rgba(88,101,242,0.25);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><svg width="18" height="14" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.6 58.6 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A37.7 37.7 0 0 0 25.4.5a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.6 4.9a.2.2 0 0 0-.1.1C1.6 18-.9 30.8.3 43.4a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.3 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36.3 36.3 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-9 .2.2 0 0 0 .1-.2C72.1 28.8 68.3 16.1 60.2 5a.2.2 0 0 0-.1-.1zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.9 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
+            <span style="font-weight:700;font-size:0.875rem">Discord Live</span><span style="width:7px;height:7px;background:var(--success);border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span></div>
+            <div><span style="font-size:1.2rem;font-weight:800;font-family:var(--mono-font)" id="adm-total">…</span> <span style="color:var(--muted);font-size:0.8rem">members</span></div>
+            <div><span style="font-size:1.2rem;font-weight:800;font-family:var(--mono-font);color:var(--success)" id="adm-online">…</span> <span style="color:var(--muted);font-size:0.8rem">online</span></div>
+            <div style="margin-left:auto"><a id="dash-discord-link" href="https://discord.gg/563HhmTgRK" target="_blank" style="color:#5865F2;font-size:0.8rem;text-decoration:none;font-weight:700">Open Server ↗</a></div>
           </div>
-          <div><span style="font-size:1.3rem;font-weight:800;font-family:'Space Mono',monospace;color:var(--text)" id="adm-total">…</span> <span style="color:var(--muted);font-size:0.8rem">total members</span></div>
-          <div><span style="font-size:1.3rem;font-weight:800;font-family:'Space Mono',monospace;color:var(--success)" id="adm-online">…</span> <span style="color:var(--muted);font-size:0.8rem">online now</span></div>
-          <div style="margin-left:auto"><a href="https://discord.gg/563HhmTgRK" target="_blank" style="color:#5865F2;font-size:0.8rem;text-decoration:none;font-weight:700">Open Server ↗</a></div>
-        </div>
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;font-family:'Space Mono',monospace;letter-spacing:1px;">RECENT SUBMISSIONS</p>
+          <p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;font-family:var(--mono-font);letter-spacing:1px;">RECENT SUBMISSIONS</p>
           <div id="d-recent"></div>
         </div>
 
-        <!-- Pending -->
+        <!-- PENDING -->
         <div class="adm-panel" id="ap-pending">
           <div class="adm-hd"><h1>Pending Review</h1><p>Approve or reject new portfolio submissions.</p></div>
           <div id="pending-list"></div>
         </div>
 
-        <!-- All -->
+        <!-- ALL PORTFOLIOS -->
         <div class="adm-panel" id="ap-all">
           <div class="adm-hd"><h1>All Portfolios</h1><p>Manage every submitted portfolio.</p></div>
           <div id="all-list"></div>
         </div>
 
-        <!-- Settings -->
-        <div class="adm-panel" id="ap-settings">
-          <div class="adm-hd"><h1>Settings</h1><p>Configure DevLink. Changes take effect after saving.</p></div>
+        <!-- CONTENT EDITOR -->
+        <div class="adm-panel" id="ap-content">
+          <div class="adm-hd"><h1>Content Editor</h1><p>Edit all text, labels, and copy on the site.</p></div>
+          <div class="preview-bar">✏️ Changes apply <span>instantly</span> as you type — click Save to persist.</div>
+
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="ctab('hero',this)">Hero Section</button>
+            <button class="tab-btn" onclick="ctab('nav',this)">Navigation</button>
+            <button class="tab-btn" onclick="ctab('features',this)">Feature Cards</button>
+            <button class="tab-btn" onclick="ctab('cta',this)">CTA Section</button>
+            <button class="tab-btn" onclick="ctab('stats',this)">Stat Labels</button>
+          </div>
+
+          <!-- Hero tab -->
+          <div class="tab-panel active" id="ctab-hero">
+            <div class="scard full" style="margin-bottom:0;">
+              <div class="fc-row"><div><div class="fc-label">Badge Text</div><div class="fc-desc">Small pill above the title</div></div><div class="fc-ctrl"><input class="fi fi-lg" id="c-badge" oninput="live('hero-badge-el','innerHTML',this.value)" placeholder="🎮 Roblox Developer Network"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Title Line 1</div><div class="fc-desc">First line of the big heading</div></div><div class="fc-ctrl"><input class="fi fi-lg" id="c-title1" oninput="liveHeroTitle()" placeholder="Connect."></div></div>
+              <div class="fc-row"><div><div class="fc-label">Title Line 2 (gradient)</div><div class="fc-desc">The highlighted gradient word</div></div><div class="fc-ctrl"><input class="fi fi-lg" id="c-title2" oninput="liveHeroTitle()" placeholder="Get Hired."></div></div>
+              <div class="fc-row"><div><div class="fc-label">Title Line 3</div><div class="fc-desc">Third line of heading</div></div><div class="fc-ctrl"><input class="fi fi-lg" id="c-title3" oninput="liveHeroTitle()" placeholder="Build."></div></div>
+              <div class="fc-row"><div><div class="fc-label">Hero Subtitle</div><div class="fc-desc">Paragraph below the title</div></div><div class="fc-ctrl"><textarea class="fi" id="c-herosub" style="width:280px;height:70px;resize:none" oninput="live('hero-sub-el','textContent',this.value)" placeholder="The #1 community..."></textarea></div></div>
+              <div class="fc-row"><div><div class="fc-label">Discord Button Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-discbtn" oninput="live('discord-btn-label','textContent',this.value)" placeholder="Join Our Discord"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Portfolio Button Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-pfbtn" oninput="live('cta-btn-el','textContent',this.value)" placeholder="✦ Create Portfolio"></div></div>
+            </div>
+          </div>
+
+          <!-- Nav tab -->
+          <div class="tab-panel" id="ctab-nav">
+            <div class="scard full" style="margin-bottom:0;">
+              <div class="fc-row"><div><div class="fc-label">Logo Text (part 1)</div><div class="fc-desc">The accent-colored part</div></div><div class="fc-ctrl"><input class="fi fi-sm" id="c-logo1" oninput="liveLogoUpdate()" placeholder="dev"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Logo Text (part 2)</div><div class="fc-desc">The white-colored part</div></div><div class="fc-ctrl"><input class="fi fi-sm" id="c-logo2" oninput="liveLogoUpdate()" placeholder="link"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Nav Discord Button</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-navdiscord" oninput="live('nav-discord-btn','textContent',this.value)" placeholder="Join Discord"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Page Title (browser tab)</div></div><div class="fc-ctrl"><input class="fi fi-xl" id="c-pagetitle" oninput="document.getElementById('page-title').textContent=this.value" placeholder="DevLink — Roblox Developer Network"></div></div>
+            </div>
+          </div>
+
+          <!-- Features tab -->
+          <div class="tab-panel" id="ctab-features">
+            <div class="scard full" style="margin-bottom:1rem;">
+              <div class="fc-row"><div><div class="fc-label">Section Eyebrow</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-feat-eyebrow" oninput="live('features-eyebrow','textContent',this.value)" placeholder="Why DevLink"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Section Title</div></div><div class="fc-ctrl"><input class="fi fi-xl" id="c-feat-title" oninput="live('features-title','innerHTML',this.value)" placeholder="Built for Roblox devs..."></div></div>
+              <div class="fc-row"><div><div class="fc-label">Section Subtitle</div></div><div class="fc-ctrl"><textarea class="fi" id="c-feat-sub" style="width:280px;height:60px;resize:none" oninput="live('features-sub','textContent',this.value)" placeholder="Everything you need..."></textarea></div></div>
+            </div>
+            <div class="feature-editor" id="feat-editor"></div>
+          </div>
+
+          <!-- CTA tab -->
+          <div class="tab-panel" id="ctab-cta">
+            <div class="scard full" style="margin-bottom:0;">
+              <div class="fc-row"><div><div class="fc-label">CTA Heading</div></div><div class="fc-ctrl"><input class="fi fi-xl" id="c-ctatitle" oninput="live('cta-title','textContent',this.value)" placeholder="Ready to level up?"></div></div>
+              <div class="fc-row"><div><div class="fc-label">CTA Body</div></div><div class="fc-ctrl"><textarea class="fi" id="c-ctabody" style="width:280px;height:70px;resize:none" oninput="live('cta-body','textContent',this.value)" placeholder="Join the DevLink Discord..."></textarea></div></div>
+              <div class="fc-row"><div><div class="fc-label">CTA Button Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-ctabtn" oninput="live('cta-btn-label','textContent',this.value)" placeholder="Join DevLink Discord"></div></div>
+            </div>
+          </div>
+
+          <!-- Stats tab -->
+          <div class="tab-panel" id="ctab-stats">
+            <div class="scard full" style="margin-bottom:0;">
+              <div class="fc-row"><div><div class="fc-label">Members Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-sl-members" oninput="live('stat-label-members','textContent',this.value)" placeholder="Total Members"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Online Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-sl-online" oninput="live('stat-label-online','textContent',this.value)" placeholder="Online Now"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Portfolios Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-sl-portfolios" oninput="live('stat-label-portfolios','textContent',this.value)" placeholder="Portfolios"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Hired Label</div></div><div class="fc-ctrl"><input class="fi fi-md" id="c-sl-hired" oninput="live('stat-label-hired','textContent',this.value)" placeholder="Hired This Month"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Override Members #</div><div class="fc-desc">Leave blank for live Discord count</div></div><div class="fc-ctrl"><input class="fi fi-sm" id="s-members" placeholder="auto"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Override Portfolios #</div><div class="fc-desc">Leave blank to auto-count</div></div><div class="fc-ctrl"><input class="fi fi-sm" id="s-pfcount" placeholder="auto"></div></div>
+              <div class="fc-row"><div><div class="fc-label">Hired This Month #</div></div><div class="fc-ctrl"><input class="fi fi-sm" id="s-hired" placeholder="0"></div></div>
+            </div>
+          </div>
+
+          <button class="sbtn" style="margin-top:1.5rem;" onclick="saveContent()">💾 Save Content</button>
+        </div>
+
+        <!-- DESIGN EDITOR -->
+        <div class="adm-panel" id="ap-design">
+          <div class="adm-hd"><h1>Design</h1><p>Colors, fonts, borders, and spacing. All live preview.</p></div>
+          <div class="preview-bar">🎨 Changes preview <span>instantly</span> — click Save to persist.</div>
+
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="dtab('colors',this)">Colors</button>
+            <button class="tab-btn" onclick="dtab('fonts',this)">Fonts</button>
+            <button class="tab-btn" onclick="dtab('shapes',this)">Shapes & Spacing</button>
+            <button class="tab-btn" onclick="dtab('bg',this)">Background</button>
+          </div>
+
+          <!-- Colors -->
+          <div class="tab-panel active" id="dtab-colors">
+            <div class="sg" style="margin-top:0.5rem;">
+              <div class="scard full">
+                <h3>Color Palette</h3><p class="sd">All colors update live as you edit.</p>
+                <div class="si"><div class="sil"><div class="sln">Primary Accent</div><div class="sld">Main highlight, links, active states</div></div><div class="cr"><input type="color" id="cp-accent" oninput="lcSync('--accent',this,'ct-accent')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-accent" oninput="lcSyncTxt('--accent',this,'cp-accent')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Secondary Accent</div><div class="sld">Gradient partner, decorative</div></div><div class="cr"><input type="color" id="cp-accent2" oninput="lcSync('--accent2',this,'ct-accent2')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-accent2" oninput="lcSyncTxt('--accent2',this,'cp-accent2')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Tertiary Accent</div><div class="sld">Warnings, pending badges</div></div><div class="cr"><input type="color" id="cp-accent3" oninput="lcSync('--accent3',this,'ct-accent3')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-accent3" oninput="lcSyncTxt('--accent3',this,'cp-accent3')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Background</div><div class="sld">Main page background</div></div><div class="cr"><input type="color" id="cp-bg" oninput="lcSync('--bg',this,'ct-bg')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-bg" oninput="lcSyncTxt('--bg',this,'cp-bg')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Surface</div><div class="sld">Cards and panels background</div></div><div class="cr"><input type="color" id="cp-surface" oninput="lcSync('--surface',this,'ct-surface')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-surface" oninput="lcSyncTxt('--surface',this,'cp-surface')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Surface 2</div><div class="sld">Inputs, code blocks, secondary panels</div></div><div class="cr"><input type="color" id="cp-surface2" oninput="lcSync('--surface2',this,'ct-surface2')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-surface2" oninput="lcSyncTxt('--surface2',this,'cp-surface2')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Border</div><div class="sld">Card borders and dividers</div></div><div class="cr"><input type="color" id="cp-border" oninput="lcSync('--border',this,'ct-border')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-border" oninput="lcSyncTxt('--border',this,'cp-border')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Text</div><div class="sld">Main body text color</div></div><div class="cr"><input type="color" id="cp-text" oninput="lcSync('--text',this,'ct-text')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-text" oninput="lcSyncTxt('--text',this,'cp-text')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Muted Text</div><div class="sld">Subtitles and secondary text</div></div><div class="cr"><input type="color" id="cp-muted" oninput="lcSync('--muted',this,'ct-muted')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-muted" oninput="lcSyncTxt('--muted',this,'cp-muted')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Success</div><div class="sld">Approved badges, online dot</div></div><div class="cr"><input type="color" id="cp-success" oninput="lcSync('--success',this,'ct-success')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-success" oninput="lcSyncTxt('--success',this,'cp-success')"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Danger</div><div class="sld">Rejected badges, errors</div></div><div class="cr"><input type="color" id="cp-danger" oninput="lcSync('--danger',this,'ct-danger')"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" id="ct-danger" oninput="lcSyncTxt('--danger',this,'cp-danger')"></div></div>
+              </div>
+              <div class="scard full">
+                <h3>Presets</h3><p class="sd">One-click color themes.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+                  <button class="abtn" onclick="applyPreset('cyber')" style="padding:0.5rem 1rem;">🔵 Cyber Blue (default)</button>
+                  <button class="abtn" onclick="applyPreset('neon')" style="padding:0.5rem 1rem;">🟢 Neon Green</button>
+                  <button class="abtn" onclick="applyPreset('rose')" style="padding:0.5rem 1rem;">🩷 Rose Pink</button>
+                  <button class="abtn" onclick="applyPreset('amber')" style="padding:0.5rem 1rem;">🟡 Amber Gold</button>
+                  <button class="abtn" onclick="applyPreset('violet')" style="padding:0.5rem 1rem;">🟣 Deep Violet</button>
+                  <button class="abtn" onclick="applyPreset('slate')" style="padding:0.5rem 1rem;">⚪ Light Slate</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fonts -->
+          <div class="tab-panel" id="dtab-fonts">
+            <div class="sg" style="margin-top:0.5rem;">
+              <div class="scard full">
+                <h3>Body Font</h3><p class="sd">Used for all regular text, buttons, and UI.</p>
+                <div class="font-picker" id="body-font-picker"></div>
+              </div>
+              <div class="scard full">
+                <h3>Monospace Font</h3><p class="sd">Used for logo, code, and stat numbers.</p>
+                <div class="font-picker" id="mono-font-picker"></div>
+              </div>
+              <div class="scard full">
+                <h3>Custom Google Font</h3><p class="sd">Enter any Google Font name to use it as body font.</p>
+                <div style="display:flex;gap:0.75rem;align-items:center;margin-top:0.5rem;">
+                  <input class="fi" id="custom-font-input" placeholder="e.g. Raleway" style="max-width:220px">
+                  <button class="abtn" onclick="applyCustomFont()">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shapes -->
+          <div class="tab-panel" id="dtab-shapes">
+            <div class="sg" style="margin-top:0.5rem;">
+              <div class="scard full">
+                <h3>Border Radius</h3><p class="sd">Controls the roundness of cards and buttons.</p>
+                <div class="si"><div class="sil"><div class="sln">Card Radius</div></div>
+                  <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="range" min="0" max="32" value="16" id="r-card" style="width:140px" oninput="lcPx('--card-radius',this.value);document.getElementById('rv-card').textContent=this.value+'px'">
+                    <span id="rv-card" style="font-family:var(--mono-font);font-size:0.8rem;width:40px">16px</span>
+                  </div>
+                </div>
+                <div class="si"><div class="sil"><div class="sln">Button Radius</div></div>
+                  <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="range" min="0" max="32" value="10" id="r-btn" style="width:140px" oninput="lcPx('--btn-radius',this.value);document.getElementById('rv-btn').textContent=this.value+'px'">
+                    <span id="rv-btn" style="font-family:var(--mono-font);font-size:0.8rem;width:40px">10px</span>
+                  </div>
+                </div>
+              </div>
+              <div class="scard full">
+                <h3>Nav Bar</h3><p class="sd">Controls the navigation bar appearance.</p>
+                <div class="si"><div class="sil"><div class="sln">Nav Background Opacity</div><div class="sld">How transparent the nav bg is</div></div>
+                  <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="range" min="0" max="100" value="90" id="r-navop" style="width:140px" oninput="updateNavBg()">
+                    <span id="rv-navop" style="font-family:var(--mono-font);font-size:0.8rem;width:40px">90%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Background -->
+          <div class="tab-panel" id="dtab-bg">
+            <div class="sg" style="margin-top:0.5rem;">
+              <div class="scard full">
+                <h3>Connections Background</h3><p class="sd">The animated network effect.</p>
+                <div class="si"><div class="sil"><div class="sln">Enable Animation</div></div><label class="toggle"><input type="checkbox" id="s-bg" checked onchange="toggleBg()"><span class="tslide"></span></label></div>
+                <div class="si"><div class="sil"><div class="sln">Node Count</div><div class="sld">Number of floating dots</div></div>
+                  <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="range" min="10" max="150" value="60" id="s-nodes" style="width:140px" oninput="nodeCount=+this.value;document.getElementById('ncv').textContent=this.value;initCanvas()">
+                    <span id="ncv" style="font-family:var(--mono-font);font-size:0.8rem;width:30px">60</span>
+                  </div>
+                </div>
+                <div class="si"><div class="sil"><div class="sln">Connection Distance</div><div class="sld">How far apart nodes connect</div></div>
+                  <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="range" min="60" max="300" value="140" id="s-dist" style="width:140px" oninput="connDist=+this.value;document.getElementById('dv').textContent=this.value+'px'">
+                    <span id="dv" style="font-family:var(--mono-font);font-size:0.8rem;width:45px">140px</span>
+                  </div>
+                </div>
+                <div class="si"><div class="sil"><div class="sln">Node Color</div></div><div class="cr"><input type="color" id="cp-nodecolor" value="#00d4ff" oninput="nodeColor=this.value"><input class="fi" style="width:110px;font-family:var(--mono-font);font-size:0.8rem" value="#00d4ff" oninput="nodeColor=this.value;document.getElementById('cp-nodecolor').value=this.value"></div></div>
+                <div class="si"><div class="sil"><div class="sln">Node Speed</div></div>
+                  <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="range" min="1" max="20" value="4" id="s-speed" style="width:140px" oninput="nodeSpeed=this.value/10;document.getElementById('spv').textContent=this.value">
+                    <span id="spv" style="font-family:var(--mono-font);font-size:0.8rem;width:30px">4</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="sbtn" onclick="saveDesign()">💾 Save Design</button>
+        </div>
+
+        <!-- LAYOUT -->
+        <div class="adm-panel" id="ap-layout">
+          <div class="adm-hd"><h1>Layout</h1><p>Show or hide sections of the site.</p></div>
           <div class="sg">
             <div class="scard full">
-              <h3>General</h3><p class="sd">Core site configuration.</p>
-              <div class="si"><div class="sil"><div class="sln">Site Name</div><div class="sld">Shown in the navbar</div></div><input class="fi" style="width:170px" id="s-name" value="DevLink"></div>
-              <div class="si"><div class="sil"><div class="sln">Discord Invite Link</div><div class="sld">Where all "Join Discord" buttons go</div></div><input class="fi" style="width:250px" id="s-discord" value="https://discord.gg/563HhmTgRK"></div>
-              <div class="si"><div class="sil"><div class="sln">Portfolio Base URL</div><div class="sld">Shown in portfolio link preview</div></div><input class="fi" style="width:180px" id="s-base" value="devlink.gg/"></div>
-              <div class="si"><div class="sil"><div class="sln">Change Admin Password</div><div class="sld">Leave blank to keep current</div></div><input class="fi" style="width:170px" type="password" id="s-pass" placeholder="New password…"></div>
+              <h3>Visibility</h3><p class="sd">Toggle which sections appear on the home page.</p>
+              <div class="si"><div class="sil"><div class="sln">Hero Section</div><div class="sld">Main banner with title and stats</div></div><label class="toggle"><input type="checkbox" id="v-hero" checked onchange="toggleVis('hero',this)"><span class="tslide"></span></label></div>
+              <div class="si"><div class="sil"><div class="sln">Features Grid</div><div class="sld">The 6 feature cards section</div></div><label class="toggle"><input type="checkbox" id="v-features" checked onchange="toggleSection('.section:nth-of-type(1)',this)"><span class="tslide"></span></label></div>
+              <div class="si"><div class="sil"><div class="sln">Discord CTA Block</div><div class="sld">Bottom call-to-action banner</div></div><label class="toggle"><input type="checkbox" id="v-cta" checked onchange="toggleSection('.discord-cta',this)"><span class="tslide"></span></label></div>
+              <div class="si"><div class="sil"><div class="sln">Stats Row</div><div class="sld">Member count, online, etc</div></div><label class="toggle"><input type="checkbox" id="v-stats" checked onchange="toggleSection('.stats-row',this)"><span class="tslide"></span></label></div>
+              <div class="si"><div class="sil"><div class="sln">Live Discord Label</div><div class="sld">"live from discord · updates every 60s"</div></div><label class="toggle"><input type="checkbox" id="v-livelabel" checked onchange="toggleSection('.hero>p:last-child',this)"><span class="tslide"></span></label></div>
             </div>
-            <div class="scard">
-              <h3>Moderation</h3><p class="sd">Control submission flow.</p>
-              <div class="si"><div class="sil"><div class="sln">Require Approval</div><div class="sld">Portfolios go live only after admin review</div></div><label class="toggle"><input type="checkbox" id="s-approval" checked><span class="tslide"></span></label></div>
-              <div class="si"><div class="sil"><div class="sln">Submissions Open</div><div class="sld">Allow new portfolios to be submitted</div></div><label class="toggle"><input type="checkbox" id="s-subs" checked><span class="tslide"></span></label></div>
+            <div class="scard full">
+              <h3>Moderation</h3><p class="sd">Submission flow controls.</p>
+              <div class="si"><div class="sil"><div class="sln">Require Portfolio Approval</div><div class="sld">Portfolios need admin approval before going live</div></div><label class="toggle"><input type="checkbox" id="s-approval" checked><span class="tslide"></span></label></div>
+              <div class="si"><div class="sil"><div class="sln">Submissions Open</div><div class="sld">Allow new portfolio submissions</div></div><label class="toggle"><input type="checkbox" id="s-subs" checked><span class="tslide"></span></label></div>
             </div>
-            <div class="scard">
-              <h3>Home Page Stats</h3><p class="sd">Numbers shown in the hero section.</p>
-              <div class="si"><div class="sil"><div class="sln">Members</div></div><input class="fi" style="width:100px" id="s-members" placeholder="e.g. 1,247"></div>
-              <div class="si"><div class="sil"><div class="sln">Portfolios</div><div class="sld">Leave blank to auto-count</div></div><input class="fi" style="width:100px" id="s-pfcount" placeholder="auto"></div>
-              <div class="si"><div class="sil"><div class="sln">Hired This Month</div></div><input class="fi" style="width:100px" id="s-hired" placeholder="e.g. 42"></div>
+          </div>
+          <button class="sbtn" onclick="saveLayout()">💾 Save Layout</button>
+        </div>
+
+        <!-- ADVANCED CSS -->
+        <div class="adm-panel" id="ap-advanced">
+          <div class="adm-hd"><h1>Advanced CSS</h1><p>Inject custom CSS that applies on top of everything else.</p></div>
+          <div class="preview-bar">⚡ CSS applies <span>live</span> as you type. Use this for anything not covered by the design panel.</div>
+          <div class="scard full">
+            <h3>Custom CSS</h3><p class="sd">Write valid CSS. All selectors work. Injected into &lt;style id="custom-css-tag"&gt;.</p>
+            <textarea class="css-editor" id="custom-css-input" oninput="applyCustomCSS(this.value)" placeholder="/* Custom CSS */
+.hero h1 { font-style: italic; }
+.feature-card { border-style: dashed; }
+nav { border-bottom: 2px solid var(--accent); }
+"></textarea>
+          </div>
+          <button class="sbtn" onclick="saveAdvanced()">💾 Save CSS</button>
+          <button class="sbtn danger" style="margin-left:0.5rem;" onclick="clearCSS()">🗑 Clear CSS</button>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="adm-panel" id="ap-settings">
+          <div class="adm-hd"><h1>Settings</h1><p>Core configuration.</p></div>
+          <div class="sg">
+            <div class="scard full">
+              <h3>General</h3><p class="sd">These control key functionality.</p>
+              <div class="si"><div class="sil"><div class="sln">Discord Invite Link</div><div class="sld">Where all "Join Discord" buttons go</div></div><input class="fi fi-xl" id="s-discord" value="https://discord.gg/563HhmTgRK"></div>
+              <div class="si"><div class="sil"><div class="sln">Portfolio Base URL</div><div class="sld">Shown in portfolio preview</div></div><input class="fi fi-md" id="s-base" value="devlink.gg/"></div>
+              <div class="si"><div class="sil"><div class="sln">Change Admin Password</div><div class="sld">Leave blank to keep current</div></div><input class="fi fi-md" type="password" id="s-pass" placeholder="New password…"></div>
             </div>
           </div>
           <button class="sbtn" onclick="saveSettings()">💾 Save Settings</button>
         </div>
 
-        <!-- Appearance -->
-        <div class="adm-panel" id="ap-appearance">
-          <div class="adm-hd"><h1>Appearance</h1><p>Customize how DevLink looks. Changes preview instantly.</p></div>
-          <div class="sg">
-            <div class="scard full">
-              <h3>Colors</h3><p class="sd">Live preview as you change values.</p>
-              <div class="si"><div class="sil"><div class="sln">Primary Accent</div></div><div class="cr"><input type="color" id="cp1" value="#00d4ff" oninput="lc('--accent',this.value);document.getElementById('ct1').value=this.value"><input class="fi" type="text" id="ct1" value="#00d4ff" style="width:110px;font-family:'Space Mono',monospace" oninput="lc('--accent',this.value)"></div></div>
-              <div class="si"><div class="sil"><div class="sln">Secondary Accent</div></div><div class="cr"><input type="color" id="cp2" value="#7c3aed" oninput="lc('--accent2',this.value);document.getElementById('ct2').value=this.value"><input class="fi" type="text" id="ct2" value="#7c3aed" style="width:110px;font-family:'Space Mono',monospace" oninput="lc('--accent2',this.value)"></div></div>
-              <div class="si"><div class="sil"><div class="sln">Background</div></div><div class="cr"><input type="color" id="cp3" value="#080c14" oninput="lc('--bg',this.value);document.getElementById('ct3').value=this.value"><input class="fi" type="text" id="ct3" value="#080c14" style="width:110px;font-family:'Space Mono',monospace" oninput="lc('--bg',this.value)"></div></div>
-            </div>
-            <div class="scard full">
-              <h3>Background Animation</h3><p class="sd">Connections network settings.</p>
-              <div class="si"><div class="sil"><div class="sln">Enable Animation</div></div><label class="toggle"><input type="checkbox" id="s-bg" checked onchange="toggleBg()"><span class="tslide"></span></label></div>
-              <div class="si"><div class="sil"><div class="sln">Node Count</div></div>
-                <div style="flex:1;max-width:240px;padding-left:1rem;">
-                  <input type="range" min="20" max="120" value="60" id="s-nodes" oninput="nodeCount=+this.value;document.getElementById('ncv').textContent=this.value;initCanvas()">
-                  <div class="rl"><span>20</span><span id="ncv">60</span><span>120</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button class="sbtn" onclick="saveAppearance()">💾 Save Appearance</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
+      </div><!-- end admin-content -->
+    </div><!-- end admin-layout -->
+  </div><!-- end admin-dash -->
+</div><!-- end page-admin -->
 
 <div id="toast"></div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
 let CFG = {
   discord: 'https://discord.gg/563HhmTgRK',
-  password: 'admin123',
+  password: 'A1fedTEVZq',
   base: 'devlink.gg/',
   requireApproval: true,
   subsOpen: true,
-  members: '',
-  pfcount: '',
-  hired: '',
-  accent: '#00d4ff',
-  accent2: '#7c3aed',
-  bg: '#080c14',
-  nodeCount: 60,
-  bgEnabled: true,
+  members: '', pfcount: '', hired: '',
+  // Colors
+  accent:'#00d4ff',accent2:'#7c3aed',accent3:'#f59e0b',
+  bg:'#080c14',surface:'#0e1420',surface2:'#151d2e',
+  border:'#1e2d47',text:'#e8f0fe',muted:'#6b7fa3',
+  success:'#10b981',danger:'#ef4444',
+  // Fonts
+  bodyFont:'Syne', monoFont:'Space Mono',
+  // Shapes
+  cardRadius:16, btnRadius:10, navOpacity:90,
+  // BG
+  bgEnabled:true, nodeCount:60, connDist:140, nodeColor:'#00d4ff', nodeSpeed:0.4,
+  // Layout visibility
+  vHero:true,vFeatures:true,vCta:true,vStats:true,vLivelabel:true,
+  // Content
+  badge:'🎮 Roblox Developer Network',
+  title1:'Connect.',title2:'Get Hired.',title3:'Build.',
+  herosub:'The #1 community for Roblox developers. Whether you\'re hiring talent or looking for your next gig — DevLink connects you.',
+  discbtn:'Join Our Discord',pfbtn:'✦ Create Portfolio',
+  logo1:'dev',logo2:'link',
+  navdiscord:'Join Discord',pagetitle:'DevLink — Roblox Developer Network',
+  featEyebrow:'Why DevLink',featTitle:'Built for Roblox devs,<br>by Roblox devs.',
+  featSub:'Everything you need to find your next opportunity or build your dream team.',
+  ctatitle:'Ready to level up?',
+  ctabody:'Join the DevLink Discord. Post jobs, find work, and connect with the community.',
+  ctabtn:'Join DevLink Discord',
+  slMembers:'Total Members',slOnline:'Online Now',slPortfolios:'Portfolios',slHired:'Hired This Month',
+  features:[
+    {icon:'🧑‍💻',title:'Dev Portfolios',desc:'Create a portfolio with your own link. Show off projects, skills, and past work to potential hirers.'},
+    {icon:'💼',title:'Job Board',desc:'Browse curated job listings from verified Roblox studios. Filter by role and pay.'},
+    {icon:'🔗',title:'Discord Integration',desc:'Everything syncs with our Discord server. Get pinged when matching roles are posted.'},
+    {icon:'⭐',title:'Verified Studios',desc:'All hiring studios are manually verified. No scams — only legitimate opportunities.'},
+    {icon:'💰',title:'Pay Transparency',desc:'Every listing shows expected compensation upfront. Know your worth before applying.'},
+    {icon:'🚀',title:'Instant Matching',desc:'Our community connects hirers with the right devs based on skills and availability.'}
+  ],
+  customCSS:'',
 };
 
-// ── STORAGE ─────────────────────────────────────────────────
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
 const S = {
-  async get(k) { try { const r = await window.storage.get(k,true); return r ? JSON.parse(r.value) : null; } catch { return null; } },
-  async set(k,v) { try { await window.storage.set(k,JSON.stringify(v),true); return true; } catch(e){ console.error(e); return false; } },
-  async del(k) { try { await window.storage.delete(k,true); } catch {} },
-  async list(prefix) { try { const r = await window.storage.list(prefix,true); return r ? r.keys : []; } catch { return []; } },
+  async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null;}catch{return null;}},
+  async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true);return true;}catch(e){console.error(e);return false;}},
+  async del(k){try{await window.storage.delete(k,true);}catch{}},
+  async list(p){try{const r=await window.storage.list(p,true);return r?r.keys:[];}catch{return[];}},
 };
 
-// ── INIT ─────────────────────────────────────────────────────
-async function init() {
-  const saved = await S.get('cfg');
-  if (saved) {
-    CFG = { ...CFG, ...saved };
-    applyConfig();
-  }
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function init(){
+  const saved=await S.get('cfg');
+  if(saved) CFG={...CFG,...saved};
+  applyAllConfig();
   renderHomeStats();
   loadBrowse();
   checkSubsOpen();
 }
 
-function applyConfig() {
-  document.documentElement.style.setProperty('--accent', CFG.accent);
-  document.documentElement.style.setProperty('--accent2', CFG.accent2);
-  document.documentElement.style.setProperty('--bg', CFG.bg);
-  document.getElementById('base-display').textContent = CFG.base;
+function applyAllConfig(){
+  // Colors
+  const colors=['accent','accent2','accent3','bg','surface','surface2','border','text','muted','success','danger'];
+  colors.forEach(c=>document.documentElement.style.setProperty('--'+c,CFG[c]));
+  // Shapes
+  document.documentElement.style.setProperty('--card-radius',CFG.cardRadius+'px');
+  document.documentElement.style.setProperty('--btn-radius',CFG.btnRadius+'px');
+  updateNavBgDirect(CFG.navOpacity);
+  // Fonts
+  applyFont(CFG.bodyFont,CFG.monoFont);
+  // Canvas
+  nodeCount=CFG.nodeCount||60;
+  connDist=CFG.connDist||140;
+  nodeColor=CFG.nodeColor||'#00d4ff';
+  nodeSpeed=CFG.nodeSpeed||0.4;
+  animEnabled=CFG.bgEnabled!==false;
+  // Content
+  applyContent();
+  // Visibility
+  applyVisibility();
+  // Base URL
+  document.getElementById('base-display').textContent=CFG.base||'devlink.gg/';
   updPrev();
-  if (!CFG.bgEnabled) { animEnabled = false; cancelAnimationFrame(animFrame); ctx.clearRect(0,0,canvas.width,canvas.height); }
-  if (CFG.nodeCount) { nodeCount = CFG.nodeCount; initCanvas(); }
+  // Custom CSS
+  document.getElementById('custom-css-tag').textContent=CFG.customCSS||'';
+  // Page title
+  document.getElementById('page-title').textContent=CFG.pagetitle||'DevLink — Roblox Developer Network';
 }
 
-async function checkSubsOpen() {
-  const el = document.getElementById('submissions-closed');
-  const fc = document.getElementById('pf-form-card');
-  if (!CFG.subsOpen) { el.style.display='block'; fc.style.opacity='0.4'; fc.style.pointerEvents='none'; }
-  else { el.style.display='none'; fc.style.opacity='1'; fc.style.pointerEvents=''; }
+function applyContent(){
+  const c=CFG;
+  setEl('hero-badge-el','innerHTML',c.badge);
+  setEl('hero-sub-el','textContent',c.herosub);
+  setEl('discord-btn-label','textContent',c.discbtn);
+  setEl('cta-btn-el','textContent',c.pfbtn);
+  setEl('nav-discord-btn','textContent',c.navdiscord);
+  setEl('features-eyebrow','textContent',c.featEyebrow);
+  setEl('features-title','innerHTML',c.featTitle);
+  setEl('features-sub','textContent',c.featSub);
+  setEl('cta-title','textContent',c.ctatitle);
+  setEl('cta-body','textContent',c.ctabody);
+  setEl('cta-btn-label','textContent',c.ctabtn);
+  setEl('stat-label-members','textContent',c.slMembers);
+  setEl('stat-label-online','textContent',c.slOnline);
+  setEl('stat-label-portfolios','textContent',c.slPortfolios);
+  setEl('stat-label-hired','textContent',c.slHired);
+  // Logo
+  const logo=document.getElementById('nav-logo-el');
+  if(logo){logo.childNodes[0].textContent=c.logo1||'dev';document.getElementById('nav-logo-span').textContent=c.logo2||'link';}
+  // Hero title
+  setHeroTitle(c.title1,c.title2,c.title3);
+  // Features
+  (c.features||[]).forEach((f,i)=>{
+    setEl('f'+i+'-icon','textContent',f.icon);
+    setEl('f'+i+'-title','textContent',f.title);
+    setEl('f'+i+'-desc','textContent',f.desc);
+  });
 }
 
-function getInviteCode(url) {
-  const m = url.match(/discord\.gg\/([A-Za-z0-9]+)/);
-  return m ? m[1] : url;
+function applyVisibility(){
+  const c=CFG;
+  const hero=document.querySelector('.hero');
+  if(hero) hero.style.display=c.vHero===false?'none':'';
+  const statsRow=document.querySelector('.stats-row');
+  if(statsRow) statsRow.style.display=c.vStats===false?'none':'';
 }
 
-async function fetchDiscordStats() {
-  try {
-    const code = getInviteCode(CFG.discord);
-    const res = await fetch('https://discord.com/api/v10/invites/' + code + '?with_counts=true');
-    if (!res.ok) return null;
-    const data = await res.json();
-    return { total: data.approximate_member_count, online: data.approximate_presence_count };
-  } catch(e) { return null; }
+function setEl(id,prop,val){const el=document.getElementById(id);if(el&&val!==undefined)el[prop]=val;}
+function setHeroTitle(t1,t2,t3){
+  const el=document.getElementById('hero-title-el');
+  if(!el)return;
+  el.innerHTML=(t1||'Connect.')+'<br><span class="grad" id="hero-title-grad">'+(t2||'Get Hired.')+'</span><br>'+(t3||'Build.');
 }
 
-async function renderHomeStats() {
-  const keys = await S.list('pf:');
-  let approved = 0;
-  for (const k of keys) { const p = await S.get(k); if (p && p.status === 'approved') approved++; }
-  document.getElementById('h-portfolios').textContent = CFG.pfcount || approved;
-  document.getElementById('h-hired').textContent = CFG.hired || '0';
+// ─── FONTS ────────────────────────────────────────────────────────────────────
+const BODY_FONTS=['Syne','Inter','Outfit','DM Sans','Nunito','Poppins','Raleway','Josefin Sans','Rubik','Plus Jakarta Sans'];
+const MONO_FONTS=['Space Mono','Fira Code','JetBrains Mono','Source Code Pro','IBM Plex Mono','Courier Prime'];
 
-  // Live Discord stats
-  if (!CFG.members) {
-    document.getElementById('h-members').innerHTML = '<span style="font-size:1.2rem;opacity:0.4">…</span>';
-  } else {
-    document.getElementById('h-members').textContent = CFG.members;
+function buildFontPickers(){
+  const bp=document.getElementById('body-font-picker');
+  const mp=document.getElementById('mono-font-picker');
+  if(!bp||!mp)return;
+  bp.innerHTML=BODY_FONTS.map(f=>`<div class="font-opt${CFG.bodyFont===f?' sel':''}" style="font-family:'${f}',sans-serif" onclick="pickFont('body','${f}',this)">${f}</div>`).join('');
+  mp.innerHTML=MONO_FONTS.map(f=>`<div class="font-opt${CFG.monoFont===f?' sel':''}" style="font-family:'${f}',monospace" onclick="pickFont('mono','${f}',this)">${f}</div>`).join('');
+}
+
+function pickFont(type,name,el){
+  document.querySelectorAll('#'+(type==='body'?'body':'mono')+'-font-picker .font-opt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  if(type==='body') CFG.bodyFont=name; else CFG.monoFont=name;
+  applyFont(CFG.bodyFont,CFG.monoFont);
+}
+
+function applyFont(body,mono){
+  const families=[];
+  if(body) families.push(body.replace(/ /g,'+'));
+  if(mono) families.push(mono.replace(/ /g,'+'));
+  document.getElementById('gfont-link').href=`https://fonts.googleapis.com/css2?${families.map(f=>`family=${f}:wght@400;600;700;800`).join('&')}&display=swap`;
+  document.documentElement.style.setProperty('--body-font',`'${body||'Syne'}',sans-serif`);
+  document.documentElement.style.setProperty('--mono-font',`'${mono||'Space Mono'}',monospace`);
+}
+
+function applyCustomFont(){
+  const v=document.getElementById('custom-font-input').value.trim();
+  if(!v)return;
+  CFG.bodyFont=v;
+  applyFont(v,CFG.monoFont);
+  toast('Custom font applied! Save to persist.');
+}
+
+// ─── COLOR HELPERS ────────────────────────────────────────────────────────────
+function lcSync(v,inp,txtId){
+  document.documentElement.style.setProperty(v,inp.value);
+  document.getElementById(txtId).value=inp.value;
+}
+function lcSyncTxt(v,inp,colId){
+  if(/^#[0-9a-fA-F]{6}$/.test(inp.value)){
+    document.documentElement.style.setProperty(v,inp.value);
+    document.getElementById(colId).value=inp.value;
   }
-  document.getElementById('h-online').innerHTML = '<span style="font-size:1.2rem;opacity:0.4">…</span>';
+}
+function lcPx(v,val){document.documentElement.style.setProperty(v,val+'px');}
 
-  const stats = await fetchDiscordStats();
-  if (stats) {
-    if (!CFG.members) document.getElementById('h-members').textContent = stats.total.toLocaleString();
-    document.getElementById('h-online').textContent = stats.online.toLocaleString();
-  } else {
-    if (!CFG.members) document.getElementById('h-members').textContent = '—';
-    document.getElementById('h-online').textContent = '—';
-  }
+const PRESETS={
+  cyber:{accent:'#00d4ff',accent2:'#7c3aed',accent3:'#f59e0b',bg:'#080c14',surface:'#0e1420',surface2:'#151d2e',border:'#1e2d47',text:'#e8f0fe',muted:'#6b7fa3'},
+  neon:{accent:'#00ff9d',accent2:'#00ff57',accent3:'#ffdd00',bg:'#040f07',surface:'#071a0d',surface2:'#0a2414',border:'#143d1e',text:'#e0ffe8',muted:'#5a9970'},
+  rose:{accent:'#ff6b9d',accent2:'#ff4d6d',accent3:'#ffd166',bg:'#0f0812',surface:'#1a0d1a',surface2:'#221525',border:'#3d1f3d',text:'#ffe0f0',muted:'#9e6b8c'},
+  amber:{accent:'#f59e0b',accent2:'#ef4444',accent3:'#10b981',bg:'#0d0a04',surface:'#1a1508',surface2:'#221d0a',border:'#3d3515',text:'#fff8e0',muted:'#9e8b5a'},
+  violet:{accent:'#a855f7',accent2:'#6366f1',accent3:'#f59e0b',bg:'#07050f',surface:'#100d1f',surface2:'#17132d',border:'#2e1f5e',text:'#ede8ff',muted:'#7c6fa0'},
+  slate:{accent:'#64748b',accent2:'#475569',accent3:'#f59e0b',bg:'#f8fafc',surface:'#f1f5f9',surface2:'#e2e8f0',border:'#cbd5e1',text:'#0f172a',muted:'#64748b'},
+};
+function applyPreset(name){
+  const p=PRESETS[name]; if(!p)return;
+  Object.assign(CFG,p);
+  Object.keys(p).forEach(k=>document.documentElement.style.setProperty('--'+k,p[k]));
+  populateDesignForms();
+  toast('Preset applied! Save to persist.');
 }
 
-setInterval(renderHomeStats, 60000);
-
-// ── CANVAS ───────────────────────────────────────────────────
-let nodeCount = 60, animEnabled = true, nodes = [], animFrame;
-const canvas = document.getElementById('connections-canvas');
-const ctx = canvas.getContext('2d');
-
-function initCanvas() {
-  canvas.width = innerWidth; canvas.height = innerHeight; nodes = [];
-  for (let i=0;i<nodeCount;i++) nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*2.5+1});
+// ─── NAV OPACITY ─────────────────────────────────────────────────────────────
+function updateNavBg(){
+  const v=document.getElementById('r-navop').value;
+  document.getElementById('rv-navop').textContent=v+'%';
+  updateNavBgDirect(v);
 }
-function drawCanvas() {
-  if (!animEnabled) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
+function updateNavBgDirect(v){
+  // Extract bg hex and apply with opacity
+  const bg=CFG.bg||'#080c14';
+  const r=parseInt(bg.slice(1,3),16),g=parseInt(bg.slice(3,5),16),b=parseInt(bg.slice(5,7),16);
+  document.documentElement.style.setProperty('--nav-bg',`rgba(${r},${g},${b},${v/100})`);
+}
+
+// ─── CANVAS ──────────────────────────────────────────────────────────────────
+let nodeCount=60,animEnabled=true,nodes=[],animFrame,connDist=140,nodeColor='#00d4ff',nodeSpeed=0.4;
+const canvas=document.getElementById('connections-canvas');
+const ctx=canvas.getContext('2d');
+
+function initCanvas(){
+  canvas.width=innerWidth;canvas.height=innerHeight;nodes=[];
+  for(let i=0;i<nodeCount;i++) nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*nodeSpeed,vy:(Math.random()-.5)*nodeSpeed,r:Math.random()*2.5+1});
+}
+function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`${r},${g},${b}`;}
+function drawCanvas(){
+  if(!animEnabled){ctx.clearRect(0,0,canvas.width,canvas.height);return;}
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  for (let i=0;i<nodes.length;i++) for (let j=i+1;j<nodes.length;j++) {
+  const rgb=hexToRgb(nodeColor||'#00d4ff');
+  for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
     const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
-    if (d<140){ctx.strokeStyle=`rgba(0,212,255,${(1-d/140)*.25})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();}
+    if(d<connDist){ctx.strokeStyle=`rgba(${rgb},${(1-d/connDist)*.25})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();}
   }
-  nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle='rgba(0,212,255,0.5)';ctx.fill();n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>canvas.width)n.vx*=-1;if(n.y<0||n.y>canvas.height)n.vy*=-1;});
+  nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=`rgba(${rgb},0.5)`;ctx.fill();n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>canvas.width)n.vx*=-1;if(n.y<0||n.y>canvas.height)n.vy*=-1;});
   animFrame=requestAnimationFrame(drawCanvas);
 }
 function toggleBg(){animEnabled=document.getElementById('s-bg').checked;cancelAnimationFrame(animFrame);animEnabled?drawCanvas():ctx.clearRect(0,0,canvas.width,canvas.height);}
 window.addEventListener('resize',()=>{initCanvas();});
-initCanvas(); drawCanvas();
+initCanvas();drawCanvas();
 
-// ── NAV ──────────────────────────────────────────────────────
-function goPage(n) {
+// ─── NAV & PAGES ─────────────────────────────────────────────────────────────
+function goPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+n).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('anav'));
@@ -566,15 +936,66 @@ function goPage(n) {
   window.scrollTo(0,0);
   if(n==='portfolio'){loadBrowse();checkSubsOpen();}
 }
-function openDiscord(){ window.open(CFG.discord,'_blank'); }
+function openDiscord(){window.open(CFG.discord,'_blank');}
 
-// ── PORTFOLIO FORM ───────────────────────────────────────────
-function updPrev(){const v=document.getElementById('pf-slug').value||'yourname';document.getElementById('prev-slug').textContent=CFG.base+v;}
+// ─── LIVE PREVIEW HELPERS ─────────────────────────────────────────────────────
+function live(id,prop,val){const el=document.getElementById(id);if(el)el[prop]=val;}
+function liveLogoUpdate(){
+  const l1=document.getElementById('c-logo1').value||'dev';
+  const l2=document.getElementById('c-logo2').value||'link';
+  const logo=document.getElementById('nav-logo-el');
+  if(logo){logo.childNodes[0].textContent=l1;document.getElementById('nav-logo-span').textContent=l2;}
+}
+function liveHeroTitle(){
+  const t1=document.getElementById('c-title1').value||'Connect.';
+  const t2=document.getElementById('c-title2').value||'Get Hired.';
+  const t3=document.getElementById('c-title3').value||'Build.';
+  setHeroTitle(t1,t2,t3);
+}
+function applyCustomCSS(css){document.getElementById('custom-css-tag').textContent=css;}
+
+// ─── VISIBILITY ───────────────────────────────────────────────────────────────
+function toggleVis(section,cb){
+  if(section==='hero'){const h=document.querySelector('.hero');if(h)h.style.display=cb.checked?'':'none';}
+}
+function toggleSection(sel,cb){
+  document.querySelectorAll(sel).forEach(el=>el.style.display=cb.checked?'':'none');
+}
+
+// ─── DISCORD STATS ───────────────────────────────────────────────────────────
+function getInviteCode(url){const m=url.match(/discord\.gg\/([A-Za-z0-9]+)/);return m?m[1]:url;}
+async function fetchDiscordStats(){
+  try{const code=getInviteCode(CFG.discord);const res=await fetch('https://discord.com/api/v10/invites/'+code+'?with_counts=true');if(!res.ok)return null;const d=await res.json();return{total:d.approximate_member_count,online:d.approximate_presence_count};}catch{return null;}
+}
+
+async function renderHomeStats(){
+  const keys=await S.list('pf:');let approved=0;
+  for(const k of keys){const p=await S.get(k);if(p&&p.status==='approved')approved++;}
+  document.getElementById('h-portfolios').textContent=CFG.pfcount||approved;
+  document.getElementById('h-hired').textContent=CFG.hired||'0';
+  if(!CFG.members) document.getElementById('h-members').innerHTML='<span style="opacity:0.4">…</span>';
+  else document.getElementById('h-members').textContent=CFG.members;
+  document.getElementById('h-online').innerHTML='<span style="opacity:0.4">…</span>';
+  const stats=await fetchDiscordStats();
+  if(stats){if(!CFG.members)document.getElementById('h-members').textContent=stats.total.toLocaleString();document.getElementById('h-online').textContent=stats.online.toLocaleString();}
+  else{if(!CFG.members)document.getElementById('h-members').textContent='—';document.getElementById('h-online').textContent='—';}
+}
+setInterval(renderHomeStats,60000);
+
+// ─── PORTFOLIO ────────────────────────────────────────────────────────────────
+function updPrev(){const v=document.getElementById('pf-slug').value||'yourname';document.getElementById('prev-slug').textContent=(CFG.base||'devlink.gg/')+v;}
 function tSkill(el){el.classList.toggle('sel');}
 let selRoleVal='dev';
 function selRole(el,r){document.querySelectorAll('.role-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');selRoleVal=r;}
 
-async function submitPf() {
+async function checkSubsOpen(){
+  const el=document.getElementById('submissions-closed');
+  const fc=document.getElementById('pf-form-card');
+  if(!CFG.subsOpen){el.style.display='block';fc.style.opacity='0.4';fc.style.pointerEvents='none';}
+  else{el.style.display='none';fc.style.opacity='1';fc.style.pointerEvents='';}
+}
+
+async function submitPf(){
   const name=document.getElementById('pf-name').value.trim();
   const slug=document.getElementById('pf-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
   const bio=document.getElementById('pf-bio').value.trim();
@@ -594,45 +1015,35 @@ async function submitPf() {
   const ok=await S.set('pf:'+slug,pf);
   if(ok){
     toast(CFG.requireApproval?'✓ Submitted! Pending admin review.':'✓ Portfolio is live!');
-    document.getElementById('pf-name').value='';document.getElementById('pf-slug').value='';
-    document.getElementById('pf-bio').value='';document.getElementById('pf-discord').value='';
-    document.getElementById('pf-link').value='';document.getElementById('pf-rate').value='';
-    document.querySelectorAll('.stag.sel').forEach(t=>t.classList.remove('sel'));updPrev();
-    loadBrowse();renderHomeStats();
-  } else toast('Failed to save. Try again.',1);
+    ['pf-name','pf-slug','pf-bio','pf-discord','pf-link','pf-rate'].forEach(id=>document.getElementById(id).value='');
+    document.querySelectorAll('.stag.sel').forEach(t=>t.classList.remove('sel'));
+    updPrev();loadBrowse();renderHomeStats();
+  }else toast('Failed to save.',1);
 }
 
-async function loadBrowse() {
+async function loadBrowse(){
   const el=document.getElementById('browse-list');if(!el)return;
   el.innerHTML='<div class="loading">Loading…</div>';
-  const keys=await S.list('pf:');
-  const approved=[];
+  const keys=await S.list('pf:');const approved=[];
   for(const k of keys){const p=await S.get(k);if(p&&p.status==='approved')approved.push(p);}
-  if(approved.length===0){el.innerHTML='<div class="empty-st"><div class="ei">🔍</div><p>No approved portfolios yet. Be the first!</p></div>';return;}
+  if(approved.length===0){el.innerHTML='<div class="empty-st"><div class="ei">🔍</div><p>No approved portfolios yet.</p></div>';return;}
   approved.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
   el.innerHTML='<div class="pf-grid">'+approved.map(p=>`
-    <div class="pf-card">
-      <div class="pn">${x(p.name)}</div>
-      <div class="pr">${p.role==='hirer'?'Hirer':'Dev'} · ${x(p.avail)}</div>
-      ${p.bio?`<div class="pb">${x(p.bio).slice(0,100)}${p.bio.length>100?'…':''}</div>`:''}
-      <div class="ps">${p.skills.slice(0,4).map(s=>`<span class="psk">${x(s)}</span>`).join('')}</div>
-      <div class="pa">
-        ${p.link?`<a href="${x(p.link)}" target="_blank" class="abtn" style="text-decoration:none">Portfolio ↗</a>`:''}
-        <button class="abtn" onclick="cpDisc('${x(p.discord)}')">Copy Discord</button>
-      </div>
-    </div>`).join('')+'</div>';
+    <div class="pf-card"><div class="pn">${x(p.name)}</div><div class="pr">${p.role==='hirer'?'Hirer':'Dev'} · ${x(p.avail)}</div>
+    ${p.bio?`<div class="pb">${x(p.bio).slice(0,100)}${p.bio.length>100?'…':''}</div>`:''}
+    <div class="ps">${p.skills.slice(0,4).map(s=>`<span class="psk">${x(s)}</span>`).join('')}</div>
+    <div class="pa">${p.link?`<a href="${x(p.link)}" target="_blank" class="abtn" style="text-decoration:none">Portfolio ↗</a>`:''}<button class="abtn" onclick="cpDisc('${x(p.discord)}')">Copy Discord</button></div></div>`).join('')+'</div>';
 }
 function cpDisc(t){navigator.clipboard.writeText(t).then(()=>toast('Copied: '+t)).catch(()=>toast('Discord: '+t));}
 
-// ── ADMIN ────────────────────────────────────────────────────
+// ─── ADMIN ───────────────────────────────────────────────────────────────────
 function doLogin(){
   const p=document.getElementById('admin-pass').value;
   if(p===CFG.password){
     document.getElementById('admin-login').style.display='none';
     document.getElementById('admin-dash').style.display='block';
-    populateSettingsForms();
-    renderDash();
-  } else { document.getElementById('lerr').style.display='block'; }
+    populateAllForms();renderDash();
+  }else{document.getElementById('lerr').style.display='block';}
 }
 function doLogout(){
   document.getElementById('admin-dash').style.display='none';
@@ -647,137 +1058,198 @@ function aTab(n,el){
   if(n==='dashboard')renderDash();
   if(n==='pending')renderPending();
   if(n==='all')renderAll();
+  if(n==='design'){buildFontPickers();populateDesignForms();}
+  if(n==='content')populateContentForms();
+  if(n==='layout')populateLayoutForms();
+  if(n==='advanced')populateAdvancedForms();
+}
+function ctab(n,el){
+  document.querySelectorAll('.tab-panel[id^="ctab-"]').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar .tab-btn').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('ctab'))b.classList.remove('active');});
+  document.getElementById('ctab-'+n).classList.add('active');el.classList.add('active');
+}
+function dtab(n,el){
+  document.querySelectorAll('.tab-panel[id^="dtab-"]').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('dtab'))b.classList.remove('active');});
+  document.getElementById('dtab-'+n).classList.add('active');el.classList.add('active');
 }
 
-async function getAllPf(){
-  const keys=await S.list('pf:');const all=[];
-  for(const k of keys){const p=await S.get(k);if(p)all.push(p);}
-  return all.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-}
+// ─── PORTFOLIO MANAGEMENT ─────────────────────────────────────────────────────
+async function getAllPf(){const keys=await S.list('pf:');const all=[];for(const k of keys){const p=await S.get(k);if(p)all.push(p);}return all.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));}
 
 async function renderDash(){
-  // Load Discord live stats for admin panel
-  fetchDiscordStats().then(stats => {
-    if (stats) {
-      const t = document.getElementById('adm-total');
-      const o = document.getElementById('adm-online');
-      if (t) t.textContent = stats.total.toLocaleString();
-      if (o) o.textContent = stats.online.toLocaleString();
+  fetchDiscordStats().then(stats=>{
+    if(stats){
+      const t=document.getElementById('adm-total');const o=document.getElementById('adm-online');
+      if(t)t.textContent=stats.total.toLocaleString();if(o)o.textContent=stats.online.toLocaleString();
     }
   });
+  const dl=document.getElementById('dash-discord-link');if(dl)dl.href=CFG.discord;
   const all=await getAllPf();
   const tot=all.length,app=all.filter(p=>p.status==='approved').length,pnd=all.filter(p=>p.status==='pending').length,rej=all.filter(p=>p.status==='rejected').length;
-  document.getElementById('d-total').textContent=tot;
-  document.getElementById('d-approved').textContent=app;
-  document.getElementById('d-pending').textContent=pnd;
-  document.getElementById('d-rejected').textContent=rej;
+  document.getElementById('d-total').textContent=tot;document.getElementById('d-approved').textContent=app;
+  document.getElementById('d-pending').textContent=pnd;document.getElementById('d-rejected').textContent=rej;
   document.getElementById('pbadge').textContent=pnd>0?pnd:'';
   const r=all.slice(0,8);
-  document.getElementById('d-recent').innerHTML=r.length===0
-    ?'<div class="te">No submissions yet.</div>'
+  document.getElementById('d-recent').innerHTML=r.length===0?'<div class="te">No submissions yet.</div>'
     :`<table class="dt"><thead><tr><th>Name</th><th>Slug</th><th>Status</th><th>Date</th></tr></thead><tbody>
     ${r.map(p=>`<tr><td style="font-weight:700">${x(p.name)}</td><td><code style="color:var(--accent);font-size:0.8rem">${x(p.slug)}</code></td><td><span class="badge ${sb(p.status)}">${p.status}</span></td><td style="color:var(--muted);font-size:0.8rem">${new Date(p.createdAt).toLocaleDateString()}</td></tr>`).join('')}
     </tbody></table>`;
 }
-
 async function renderPending(){
   const all=await getAllPf();const pnd=all.filter(p=>p.status==='pending');
   document.getElementById('pbadge').textContent=pnd.length>0?pnd.length:'';
   const el=document.getElementById('pending-list');
-  if(pnd.length===0){el.innerHTML='<div class="empty-st"><div class="ei">✅</div><p>All caught up! No pending portfolios.</p></div>';return;}
-  el.innerHTML=`<table class="dt"><thead><tr><th>Name</th><th>Discord</th><th>Skills</th><th>Role</th><th>Actions</th></tr></thead><tbody>
-  ${pnd.map(p=>`<tr>
-    <td><div style="font-weight:700">${x(p.name)}</div><div style="font-size:0.75rem;color:var(--muted)">${x(p.slug)}${p.bio?' · '+x(p.bio).slice(0,40)+'…':''}</div></td>
-    <td style="font-family:'Space Mono',monospace;font-size:0.8rem">${x(p.discord)}</td>
-    <td style="font-size:0.8rem">${p.skills.slice(0,3).map(x).join(', ')}</td>
-    <td>${p.role==='hirer'?'Hirer':'Dev'}</td>
-    <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
-      <button class="abtn ok" onclick="approvePf('${x(p.slug)}')">Approve</button>
-      <button class="abtn bad" onclick="rejectPf('${x(p.slug)}')">Reject</button>
-      ${p.link?`<a href="${x(p.link)}" target="_blank" class="abtn" style="text-decoration:none">View ↗</a>`:''}
-    </td>
-  </tr>`).join('')}
+  if(pnd.length===0){el.innerHTML='<div class="empty-st"><div class="ei">✅</div><p>All caught up!</p></div>';return;}
+  el.innerHTML=`<table class="dt"><thead><tr><th>Name</th><th>Discord</th><th>Skills</th><th>Actions</th></tr></thead><tbody>
+  ${pnd.map(p=>`<tr><td><div style="font-weight:700">${x(p.name)}</div><div style="font-size:0.75rem;color:var(--muted)">${x(p.slug)}</div></td>
+  <td style="font-family:var(--mono-font);font-size:0.8rem">${x(p.discord)}</td>
+  <td style="font-size:0.8rem">${p.skills.slice(0,3).map(x).join(', ')}</td>
+  <td style="display:flex;gap:0.4rem;flex-wrap:wrap"><button class="abtn ok" onclick="approvePf('${x(p.slug)}')">Approve</button><button class="abtn bad" onclick="rejectPf('${x(p.slug)}')">Reject</button>${p.link?`<a href="${x(p.link)}" target="_blank" class="abtn" style="text-decoration:none">View ↗</a>`:''}</td></tr>`).join('')}
   </tbody></table>`;
 }
-
 async function renderAll(){
   const all=await getAllPf();const el=document.getElementById('all-list');
   if(all.length===0){el.innerHTML='<div class="empty-st"><div class="ei">📂</div><p>No portfolios yet.</p></div>';return;}
   el.innerHTML=`<table class="dt"><thead><tr><th>Name</th><th>Slug</th><th>Discord</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-  ${all.map(p=>`<tr>
-    <td style="font-weight:700">${x(p.name)}</td>
-    <td><code style="color:var(--accent);font-size:0.8rem">${x(p.slug)}</code></td>
-    <td style="font-family:'Space Mono',monospace;font-size:0.8rem">${x(p.discord)}</td>
-    <td><span class="badge ${sb(p.status)}">${p.status}</span></td>
-    <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
-      ${p.status!=='approved'?`<button class="abtn ok" onclick="approvePf('${x(p.slug)}')">Approve</button>`:''}
-      ${p.status!=='rejected'?`<button class="abtn bad" onclick="rejectPf('${x(p.slug)}')">Reject</button>`:''}
-      <button class="abtn bad" onclick="deletePf('${x(p.slug)}')">Delete</button>
-    </td>
-  </tr>`).join('')}
+  ${all.map(p=>`<tr><td style="font-weight:700">${x(p.name)}</td><td><code style="color:var(--accent);font-size:0.8rem">${x(p.slug)}</code></td>
+  <td style="font-family:var(--mono-font);font-size:0.8rem">${x(p.discord)}</td>
+  <td><span class="badge ${sb(p.status)}">${p.status}</span></td>
+  <td style="display:flex;gap:0.4rem;flex-wrap:wrap">${p.status!=='approved'?`<button class="abtn ok" onclick="approvePf('${x(p.slug)}')">Approve</button>`:''
+  }${p.status!=='rejected'?`<button class="abtn bad" onclick="rejectPf('${x(p.slug)}')">Reject</button>`:''}<button class="abtn bad" onclick="deletePf('${x(p.slug)}')">Delete</button></td></tr>`).join('')}
   </tbody></table>`;
 }
+async function approvePf(s){const p=await S.get('pf:'+s);if(!p)return;p.status='approved';await S.set('pf:'+s,p);toast('✓ Approved!');renderDash();renderPending();renderAll();loadBrowse();renderHomeStats();}
+async function rejectPf(s){const p=await S.get('pf:'+s);if(!p)return;p.status='rejected';await S.set('pf:'+s,p);toast('Rejected.');renderDash();renderPending();renderAll();}
+async function deletePf(s){if(!confirm('Delete permanently?'))return;await S.del('pf:'+s);toast('Deleted.');renderDash();renderPending();renderAll();loadBrowse();renderHomeStats();}
 
-async function approvePf(slug){const p=await S.get('pf:'+slug);if(!p)return;p.status='approved';await S.set('pf:'+slug,p);toast('✓ Approved!');renderDash();renderPending();renderAll();loadBrowse();renderHomeStats();}
-async function rejectPf(slug){const p=await S.get('pf:'+slug);if(!p)return;p.status='rejected';await S.set('pf:'+slug,p);toast('Portfolio rejected.');renderDash();renderPending();renderAll();}
-async function deletePf(slug){if(!confirm('Delete this portfolio permanently?'))return;await S.del('pf:'+slug);toast('Deleted.');renderDash();renderPending();renderAll();loadBrowse();renderHomeStats();}
+// ─── POPULATE FORMS ───────────────────────────────────────────────────────────
+function populateAllForms(){populateContentForms();populateDesignForms();populateLayoutForms();populateAdvancedForms();populateSettingsForms();}
 
-// ── SETTINGS ─────────────────────────────────────────────────
+function populateContentForms(){
+  const c=CFG;
+  setV('c-badge',c.badge);setV('c-title1',c.title1);setV('c-title2',c.title2);setV('c-title3',c.title3);
+  setV('c-herosub',c.herosub);setV('c-discbtn',c.discbtn);setV('c-pfbtn',c.pfbtn);
+  setV('c-logo1',c.logo1||'dev');setV('c-logo2',c.logo2||'link');
+  setV('c-navdiscord',c.navdiscord);setV('c-pagetitle',c.pagetitle);
+  setV('c-feat-eyebrow',c.featEyebrow);setV('c-feat-title',c.featTitle);setV('c-feat-sub',c.featSub);
+  setV('c-ctatitle',c.ctatitle);setV('c-ctabody',c.ctabody);setV('c-ctabtn',c.ctabtn);
+  setV('c-sl-members',c.slMembers);setV('c-sl-online',c.slOnline);setV('c-sl-portfolios',c.slPortfolios);setV('c-sl-hired',c.slHired);
+  setV('s-members',c.members);setV('s-pfcount',c.pfcount);setV('s-hired',c.hired);
+  // Feature editor
+  const fe=document.getElementById('feat-editor');
+  if(fe&&c.features){
+    fe.innerHTML=c.features.map((f,i)=>`
+      <div class="feat-item">
+        <div class="feat-item-head">
+          <input class="emoji-input" id="fe-icon-${i}" value="${x(f.icon)}" oninput="live('f${i}-icon','textContent',this.value)">
+          <input class="fi" id="fe-title-${i}" value="${x(f.title)}" placeholder="Feature title" oninput="live('f${i}-title','textContent',this.value)">
+        </div>
+        <textarea id="fe-desc-${i}" oninput="live('f${i}-desc','textContent',this.value)">${x(f.desc)}</textarea>
+      </div>`).join('');
+  }
+}
+
+function populateDesignForms(){
+  const colorMap={accent:'cp-accent',accent2:'cp-accent2',accent3:'cp-accent3',bg:'cp-bg',surface:'cp-surface',surface2:'cp-surface2',border:'cp-border',text:'cp-text',muted:'cp-muted',success:'cp-success',danger:'cp-danger'};
+  Object.entries(colorMap).forEach(([k,id])=>{
+    const cp=document.getElementById(id);const ct=document.getElementById(id.replace('cp-','ct-'));
+    if(cp&&CFG[k]){cp.value=CFG[k];if(ct)ct.value=CFG[k];}
+  });
+  // Shapes
+  const rc=document.getElementById('r-card');if(rc){rc.value=CFG.cardRadius||16;document.getElementById('rv-card').textContent=(CFG.cardRadius||16)+'px';}
+  const rb=document.getElementById('r-btn');if(rb){rb.value=CFG.btnRadius||10;document.getElementById('rv-btn').textContent=(CFG.btnRadius||10)+'px';}
+  const rn=document.getElementById('r-navop');if(rn){rn.value=CFG.navOpacity||90;document.getElementById('rv-navop').textContent=(CFG.navOpacity||90)+'%';}
+  // BG
+  const sb=document.getElementById('s-bg');if(sb)sb.checked=CFG.bgEnabled!==false;
+  const sn=document.getElementById('s-nodes');if(sn){sn.value=CFG.nodeCount||60;document.getElementById('ncv').textContent=CFG.nodeCount||60;}
+  const sd=document.getElementById('s-dist');if(sd){sd.value=CFG.connDist||140;document.getElementById('dv').textContent=(CFG.connDist||140)+'px';}
+  const cnc=document.getElementById('cp-nodecolor');if(cnc)cnc.value=CFG.nodeColor||'#00d4ff';
+  const ss=document.getElementById('s-speed');if(ss){const spd=Math.round((CFG.nodeSpeed||0.4)*10);ss.value=spd;document.getElementById('spv').textContent=spd;}
+}
+
+function populateLayoutForms(){
+  const checks={'v-hero':'vHero','v-features':'vFeatures','v-cta':'vCta','v-stats':'vStats','v-livelabel':'vLivelabel','s-approval':'requireApproval','s-subs':'subsOpen'};
+  Object.entries(checks).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.checked=CFG[k]!==false;});
+}
+function populateAdvancedForms(){const el=document.getElementById('custom-css-input');if(el)el.value=CFG.customCSS||'';}
 function populateSettingsForms(){
-  document.getElementById('s-name').value = CFG.sitename || 'DevLink';
-  document.getElementById('s-discord').value=CFG.discord;
-  document.getElementById('s-base').value=CFG.base;
-  document.getElementById('s-approval').checked=CFG.requireApproval;
-  document.getElementById('s-subs').checked=CFG.subsOpen;
-  document.getElementById('s-members').value=CFG.members;
-  document.getElementById('s-pfcount').value=CFG.pfcount;
-  document.getElementById('s-hired').value=CFG.hired;
-  document.getElementById('cp1').value=CFG.accent;document.getElementById('ct1').value=CFG.accent;
-  document.getElementById('cp2').value=CFG.accent2;document.getElementById('ct2').value=CFG.accent2;
-  document.getElementById('cp3').value=CFG.bg;document.getElementById('ct3').value=CFG.bg;
-  document.getElementById('s-bg').checked=CFG.bgEnabled;
-  document.getElementById('s-nodes').value=CFG.nodeCount;document.getElementById('ncv').textContent=CFG.nodeCount;
+  setV('s-discord',CFG.discord);setV('s-base',CFG.base);
+}
+function setV(id,v){const el=document.getElementById(id);if(el&&v!==undefined)el.value=v||'';}
+
+// ─── SAVE FUNCTIONS ───────────────────────────────────────────────────────────
+async function saveContent(){
+  const c=CFG;
+  c.badge=gv('c-badge');c.title1=gv('c-title1');c.title2=gv('c-title2');c.title3=gv('c-title3');
+  c.herosub=gv('c-herosub');c.discbtn=gv('c-discbtn');c.pfbtn=gv('c-pfbtn');
+  c.logo1=gv('c-logo1');c.logo2=gv('c-logo2');
+  c.navdiscord=gv('c-navdiscord');c.pagetitle=gv('c-pagetitle');
+  c.featEyebrow=gv('c-feat-eyebrow');c.featTitle=gv('c-feat-title');c.featSub=gv('c-feat-sub');
+  c.ctatitle=gv('c-ctatitle');c.ctabody=gv('c-ctabody');c.ctabtn=gv('c-ctabtn');
+  c.slMembers=gv('c-sl-members');c.slOnline=gv('c-sl-online');c.slPortfolios=gv('c-sl-portfolios');c.slHired=gv('c-sl-hired');
+  c.members=gv('s-members');c.pfcount=gv('s-pfcount');c.hired=gv('s-hired');
+  // Features
+  if(c.features) c.features=c.features.map((_,i)=>({icon:gv('fe-icon-'+i)||_,title:gv('fe-title-'+i)||_,desc:gv('fe-desc-'+i)||_}));
+  const ok=await S.set('cfg',CFG);
+  if(ok){renderHomeStats();toast('✓ Content saved!');} else toast('Failed.',1);
+}
+
+async function saveDesign(){
+  const colorMap={accent:'ct-accent',accent2:'ct-accent2',accent3:'ct-accent3',bg:'ct-bg',surface:'ct-surface',surface2:'ct-surface2',border:'ct-border',text:'ct-text',muted:'ct-muted',success:'ct-success',danger:'ct-danger'};
+  Object.entries(colorMap).forEach(([k,id])=>{const el=document.getElementById(id);if(el)CFG[k]=el.value;});
+  CFG.cardRadius=+gv('r-card')||16;CFG.btnRadius=+gv('r-btn')||10;CFG.navOpacity=+gv('r-navop')||90;
+  CFG.bgEnabled=document.getElementById('s-bg').checked;
+  CFG.nodeCount=+gv('s-nodes')||60;CFG.connDist=+gv('s-dist')||140;
+  CFG.nodeColor=document.getElementById('cp-nodecolor').value;
+  CFG.nodeSpeed=(+gv('s-speed')||4)/10;
+  const ok=await S.set('cfg',CFG);
+  if(ok) toast('✓ Design saved!'); else toast('Failed.',1);
+}
+
+async function saveLayout(){
+  CFG.vHero=document.getElementById('v-hero').checked;
+  CFG.vFeatures=document.getElementById('v-features').checked;
+  CFG.vCta=document.getElementById('v-cta').checked;
+  CFG.vStats=document.getElementById('v-stats').checked;
+  CFG.vLivelabel=document.getElementById('v-livelabel').checked;
+  CFG.requireApproval=document.getElementById('s-approval').checked;
+  CFG.subsOpen=document.getElementById('s-subs').checked;
+  const ok=await S.set('cfg',CFG);
+  if(ok){applyVisibility();checkSubsOpen();toast('✓ Layout saved!');} else toast('Failed.',1);
+}
+
+async function saveAdvanced(){
+  CFG.customCSS=gv('custom-css-input');
+  const ok=await S.set('cfg',CFG);
+  if(ok) toast('✓ CSS saved!'); else toast('Failed.',1);
+}
+
+async function clearCSS(){
+  CFG.customCSS='';
+  document.getElementById('custom-css-input').value='';
+  document.getElementById('custom-css-tag').textContent='';
+  await S.set('cfg',CFG);toast('CSS cleared.');
 }
 
 async function saveSettings(){
-  const np=document.getElementById('s-pass').value.trim();
-  CFG.sitename=document.getElementById('s-name').value;
-  CFG.discord=document.getElementById('s-discord').value;
-  CFG.base=document.getElementById('s-base').value;
-  CFG.requireApproval=document.getElementById('s-approval').checked;
-  CFG.subsOpen=document.getElementById('s-subs').checked;
-  CFG.members=document.getElementById('s-members').value;
-  CFG.pfcount=document.getElementById('s-pfcount').value;
-  CFG.hired=document.getElementById('s-hired').value;
-  if(np) CFG.password=np;
+  const np=gv('s-pass');
+  CFG.discord=gv('s-discord');CFG.base=gv('s-base');
+  if(np)CFG.password=np;
+  document.getElementById('s-pass').value='';
+  document.getElementById('base-display').textContent=CFG.base;updPrev();
   const ok=await S.set('cfg',CFG);
-  if(ok){
-    document.getElementById('base-display').textContent=CFG.base;updPrev();
-    checkSubsOpen();renderHomeStats();
-    toast('✓ Settings saved!');
-    document.getElementById('s-pass').value='';
-  } else toast('Failed to save.',1);
+  if(ok) toast('✓ Settings saved!'); else toast('Failed.',1);
 }
 
-async function saveAppearance(){
-  CFG.accent=document.getElementById('ct1').value;
-  CFG.accent2=document.getElementById('ct2').value;
-  CFG.bg=document.getElementById('ct3').value;
-  CFG.nodeCount=+document.getElementById('s-nodes').value;
-  CFG.bgEnabled=document.getElementById('s-bg').checked;
-  const ok=await S.set('cfg',CFG);
-  if(ok) toast('✓ Appearance saved!'); else toast('Failed to save.',1);
-}
+function gv(id){const el=document.getElementById(id);return el?el.value:'';}
 
-function lc(v,val){document.documentElement.style.setProperty(v,val);}
-
-// ── UTILS ─────────────────────────────────────────────────────
+// ─── UTILS ───────────────────────────────────────────────────────────────────
 function x(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function sb(s){return s==='approved'?'bg':s==='pending'?'by':'br';}
 function toast(msg,err=0){
   const t=document.getElementById('toast');t.textContent=msg;
-  t.className=err?'err show':'show';
-  clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3500);
+  t.className=err?'err show':'show';clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3500);
 }
 
 init();
